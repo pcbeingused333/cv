@@ -1,0 +1,4 @@
+# Generated exports — the Markdown is the source of truth.
+*.pdf
+*.docx
+.DS_Store
