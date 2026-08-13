@@ -2,9 +2,30 @@
 Render README.md — which is the CV — to a PDF you can attach to an application.
 
     pip install weasyprint markdown
-    python build_pdf.py
+    python build_pdf.py            # full version, ~4 pages
+    python build_pdf.py --short    # 2-page version for applications
 
-Writes Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf next to this file.
+Two lengths, one source
+-----------------------
+Keeping a second Markdown file for the short version would have it drift from this one
+inside two edits, so both come out of README.md via markers:
+
+    <!--long-->  ...visible on GitHub and in the full PDF, cut from the short one...
+    <!--/long-->
+
+    <!--short:  ...a shorter rewrite of the same passage...  -->
+
+GitHub renders HTML comments as nothing, so the short variants stay invisible in the
+README and the reading experience there is unchanged. The short build strips the `long`
+blocks and un-comments the `short` ones.
+
+The full version is for when someone asks for detail. The short one is what gets
+attached to an application: two pages is the convention, and four pages of prose from
+someone whose formal employment is measured in months reads as an editing problem before
+anyone has judged the engineering.
+
+Writes Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf (or ..._2-page.pdf) next to
+this file.
 
 The Markdown stays the single source of truth. A PDF kept as its own document drifts
 from the README within two edits, and the README is what a recruiter sees first when
@@ -29,7 +50,30 @@ from weasyprint import HTML, CSS
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SOURCE = os.path.join(HERE, "README.md")
-OUTPUT = os.path.join(HERE, "Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf")
+OUTPUT_LONG = os.path.join(HERE, "Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf")
+OUTPUT_SHORT = os.path.join(HERE, "Alex_Castillo_Gonzalez_Applied_AI_Engineer_2-page.pdf")
+
+LONG_BLOCK = re.compile(r"[ \t]*<!--long-->[ \t]*\n(.*?)\n?[ \t]*<!--/long-->[ \t]*\n?", re.S)
+SHORT_BLOCK = re.compile(r"[ \t]*<!--short:[ \t]*\n(.*?)\n?[ \t]*-->[ \t]*\n?", re.S)
+
+
+def select_variant(text: str, short: bool) -> str:
+    """Resolve the long/short markers down to one version of the document."""
+    if short:
+        text = LONG_BLOCK.sub("", text)
+        text = SHORT_BLOCK.sub(lambda m: m.group(1) + "\n", text)
+    else:
+        text = LONG_BLOCK.sub(lambda m: m.group(1) + "\n", text)
+        text = SHORT_BLOCK.sub("", text)
+
+    if "<!--" in text:
+        raise SystemExit(
+            "Unresolved marker left in the document — check for an unclosed "
+            "<!--long--> or <!--short: block in README.md."
+        )
+    # Collapse the blank-line runs the stripped blocks leave behind, or Markdown
+    # renders spurious gaps between sections.
+    return re.sub(r"\n{3,}", "\n\n", text)
 
 STYLESHEET = """
 @page {
@@ -51,6 +95,13 @@ body {
     line-height: 1.42;
     color: #16191F;
     margin: 0;
+    /* Kerning is what a parser trips over. The renderer tightens pairs like "Ty" and
+       "Ta" with a positioning offset, and text extraction reads the offset as a space:
+       "TypeScript" comes back as "T ypeScript", "Terraform" as "T erraform", "Tailwind"
+       as "T ailwind". An applicant tracking system searching for those exact strings
+       finds nothing. The typographic loss at 9pt is invisible; the parsing loss is not. */
+    font-kerning: none;
+    font-variant-ligatures: none;
 }
 
 /* Name.
@@ -136,22 +187,47 @@ li { page-break-inside: avoid; }
 """
 
 
-def build() -> None:
+# Applied on top of STYLESHEET for the two-page build. Modest: the point of the short
+# version is that there is less to say, not that the same text is squeezed smaller. Type
+# below about 8.5pt stops being comfortable on paper, so the savings come from spacing.
+SHORT_TIGHTENING = """
+body { font-size: 8.6pt; line-height: 1.31; }
+@page { margin: 11mm 13mm 13mm; }
+h1 { font-size: 18pt; margin-bottom: 2.4mm; }
+h2 { font-size: 9.4pt; margin: 3.2mm 0 1.2mm; }
+h3 { font-size: 9.2pt; margin: 2.2mm 0 0.4mm; }
+p { margin: 0 0 1.2mm; }
+li { margin-bottom: 0.6mm; }
+ul { margin: 0 0 1.5mm; }
+hr { margin: 2.2mm 0 0; }
+"""
+
+
+def build(short: bool = False) -> None:
     with open(SOURCE, encoding="utf-8") as handle:
-        text = handle.read()
+        text = select_variant(handle.read(), short)
 
     body = markdown.markdown(text, extensions=["extra", "sane_lists"])
     document = f"<!doctype html><html><head><meta charset='utf-8'>" \
                f"<title>Alex Castillo González — Applied AI Engineer</title></head>" \
                f"<body>{body}</body></html>"
 
-    HTML(string=document, base_url=HERE).write_pdf(
-        OUTPUT, stylesheets=[CSS(string=STYLESHEET)]
-    )
+    output = OUTPUT_SHORT if short else OUTPUT_LONG
+    sheets = [CSS(string=STYLESHEET)]
+    if short:
+        sheets.append(CSS(string=SHORT_TIGHTENING))
 
-    size_kb = os.path.getsize(OUTPUT) / 1024
-    print(f"Wrote {OUTPUT} ({size_kb:.0f} KB)")
+    rendered = HTML(string=document, base_url=HERE).render(stylesheets=sheets)
+    rendered.write_pdf(output)
+
+    pages = len(rendered.pages)
+    size_kb = os.path.getsize(output) / 1024
+    print(f"Wrote {output} ({size_kb:.0f} KB, {pages} pages)")
+    if short and pages > 2:
+        print(f"  !! {pages} pages — the short version is meant to be 2. Trim further.")
 
 
 if __name__ == "__main__":
-    build()
+    import sys
+
+    build(short="--short" in sys.argv)
