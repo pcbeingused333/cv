@@ -1,5 +1,8 @@
-# Generated exports — the Markdown is the source of truth.
-*.pdf
+# The Markdown is still the source of truth, but the PDFs are committed so they can
+# be downloaded from the repo without cloning it. That is only safe because CI
+# rebuilds them on every change to README.md — a generated file committed by hand
+# goes stale the first time you edit the source and forget, and a stale CV is worse
+# than no PDF at all.
 *.docx
 .DS_Store
 

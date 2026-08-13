@@ -1,0 +1,99 @@
+name: pdf
+
+# The PDFs are committed so they can be downloaded straight from the repo. That is a
+# generated artefact living in version control, which is normally how you end up
+# shipping a stale one — so it is not maintained by hand. Every push that touches the
+# CV or the builder regenerates both and commits them if they changed.
+on:
+  push:
+    branches: [main]
+    paths:
+      - README.md
+      - build_pdf.py
+      - .github/workflows/pdf.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pdf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      # WeasyPrint renders through Pango, which is a system library rather than a
+      # wheel. DejaVu is pinned explicitly: the stylesheet asks for it by name, and a
+      # runner without it would silently fall back to a different face and repaginate
+      # the two-page version into three.
+      - name: System dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz0b fonts-dejavu-core
+
+      - run: pip install weasyprint markdown
+
+      - name: Build both versions
+        run: |
+          python build_pdf.py
+          python build_pdf.py --short
+
+      # build_pdf.py prints a warning when the short version overruns two pages, but a
+      # warning in a log nobody reads is not a check. This fails the run instead.
+      - name: The short version must actually be two pages
+        run: |
+          pip install pypdf
+          python - <<'PY'
+          import sys
+          from pypdf import PdfReader
+          pages = len(PdfReader("Alex_Castillo_Gonzalez_Applied_AI_Engineer_2-page.pdf").pages)
+          print(f"short version: {pages} pages")
+          if pages != 2:
+              sys.exit(f"expected 2 pages, got {pages} — trim README.md")
+          PY
+
+      # The renderer kerns pairs like "Ty" and "Ta" with a positioning offset that text
+      # extraction reads as a space, so "TypeScript" comes back as "T ypeScript" and an
+      # applicant tracking system searching for it finds nothing. build_pdf.py disables
+      # kerning; this proves it stayed disabled.
+      - name: Keywords must survive text extraction
+        run: |
+          python - <<'PY'
+          import sys
+          from pypdf import PdfReader
+
+          TERMS = ["TypeScript", "Terraform", "Tailwind", "LangGraph", "pgvector",
+                   "PostgreSQL", "Model Context Protocol", "Python", "AWS", "GDPR",
+                   "Alex Castillo González"]
+          failed = False
+          for path in ("Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf",
+                       "Alex_Castillo_Gonzalez_Applied_AI_Engineer_2-page.pdf"):
+              text = " ".join(p.extract_text() for p in PdfReader(path).pages)
+              missing = [t for t in TERMS if t not in text]
+              print(f"{path}: {'ok' if not missing else 'MISSING ' + ', '.join(missing)}")
+              failed |= bool(missing)
+          if failed:
+              sys.exit("a keyword is unfindable in the extracted text")
+          PY
+
+      - name: Commit the rebuilt PDFs
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ./*.pdf
+          if git diff --cached --quiet; then
+            echo "PDFs unchanged."
+          else
+            git commit -m "Rebuild the CV PDFs [skip ci]"
+            git push
+          fi
