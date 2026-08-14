@@ -21,7 +21,8 @@ tool trajectories and answer grounding for the MCP agent — and in each case th
 found defects the tests did not. Fullstack background across Python, TypeScript and
 Ruby, with production experience shipping and operating what I build. Two merged
 upstream contributions to `pyfenn/fenn`, a Python framework for ML workflows and LLM
-agents.
+agents, and three open fixes to the retrieval evaluation and MMR code in
+`llama-index-core`.
 <!--/long-->
 <!--short:
 Applied AI engineer working in Python on retrieval and agent systems, and on the layer
@@ -31,7 +32,8 @@ regulated domains impose and generic RAG ignores — every statement names the p
 came from, and the system declines when the source does not cover the question. Both
 projects ship with the harness that measures them, and in each case the harness found
 defects the tests did not. Fullstack background across Python, TypeScript and Ruby, plus
-two merged upstream contributions to `pyfenn/fenn`.
+two merged upstream contributions to `pyfenn/fenn` and three open fixes to the retrieval
+evaluation and MMR code in `llama-index-core`.
 -->
 
 ---
@@ -349,6 +351,18 @@ outgrown rule-based filters (Python, `pgvector`, PostgreSQL).
 
 **Open**
 
+- [`run-llama/llama_index`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333) —
+  three fixes in `llama-index-core`, found by reading the retrieval and evaluation code
+  rather than from an issue. [#22683](https://github.com/run-llama/llama_index/pull/22683):
+  the retrieval metrics scored outside their own range when a ranking repeated a node id,
+  which is what fusion retrievers produce — hit rate and average precision returned 2.0,
+  NDCG 1.63, so a mean over an eval set stopped being comparable between runs.
+  [#22684](https://github.com/run-llama/llama_index/pull/22684): MMR discounted each
+  candidate only against the result selected immediately before it, so a near-duplicate
+  re-entered the ranking as soon as an unrelated result was picked in between.
+  [#22685](https://github.com/run-llama/llama_index/pull/22685): the multi-modal evaluator
+  scored image nodes as text results, because `ImageNode` subclasses `TextNode` and the two
+  type checks were independent. Each ships with a test that fails without the fix.
 - [`rubocop/rubocop-rspec` #2209](https://github.com/rubocop/rubocop-rspec/pull/2209) —
   fixed a crash in `RSpec/LeadingSubject` on Ruby 3.4's implicit `it` block parameter: the
   cop only walked `:block` AST ancestors and hit `nil` on the new `itblock`/`numblock`
@@ -368,7 +382,10 @@ outgrown rule-based filters (Python, `pgvector`, PostgreSQL).
 support to the RAG document loader; [#286](https://github.com/pyfenn/fenn/pull/286) fixed
 install instructions naming a package that does not exist.
 
-**Open** — [`rubocop-rspec` #2209](https://github.com/rubocop/rubocop-rspec/pull/2209) and
+**Open** — [three fixes in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333):
+retrieval metrics scoring above 1.0 on a repeated node id, MMR discounting a candidate
+only against the most recent result, and the multi-modal evaluator counting image nodes
+as text. [`rubocop-rspec` #2209](https://github.com/rubocop/rubocop-rspec/pull/2209) and
 [#2214](https://github.com/rubocop/rubocop-rspec/pull/2214): a crash and a bad autocorrect
 in `RSpec/LeadingSubject` on Ruby 3.4's implicit `it` block parameter.
 [`rubocop-performance` #529](https://github.com/rubocop/rubocop-performance/pull/529):
