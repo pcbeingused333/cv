@@ -19,10 +19,11 @@ decline when the source does not cover the question. Both projects ship with the
 that measures them — retrieval, citation accuracy and abstention for the RAG system,
 tool trajectories and answer grounding for the MCP agent — and in each case the harness
 found defects the tests did not. Fullstack background across Python, TypeScript and
-Ruby, with production experience shipping and operating what I build. Two merged
-upstream contributions to `pyfenn/fenn`, a Python framework for ML workflows and LLM
-agents, and three open fixes to the retrieval evaluation and MMR code in
-`llama-index-core`.
+Ruby, with production experience shipping and operating what I build. I also fix the
+frameworks this work runs on: two merged fixes in **Haystack**, deepset's framework for
+production RAG and agent pipelines, both concurrency defects on its async path, with two
+more under review; three open fixes to the retrieval evaluation and MMR code in
+`llama-index-core`; and two merged in `pyfenn/fenn`.
 <!--/long-->
 <!--short:
 Applied AI engineer working in Python on retrieval and agent systems, and on the layer
@@ -32,8 +33,9 @@ regulated domains impose and generic RAG ignores — every statement names the p
 came from, and the system declines when the source does not cover the question. Both
 projects ship with the harness that measures them, and in each case the harness found
 defects the tests did not. Fullstack background across Python, TypeScript and Ruby, plus
-two merged upstream contributions to `pyfenn/fenn` and three open fixes to the retrieval
-evaluation and MMR code in `llama-index-core`.
+two merged fixes to concurrency defects in the async path of **Haystack**, deepset's
+framework for production RAG and agent pipelines, three open fixes to the retrieval
+evaluation and MMR code in `llama-index-core`, and two merged in `pyfenn/fenn`.
 -->
 
 ---
@@ -343,14 +345,37 @@ outgrown rule-based filters (Python, `pgvector`, PostgreSQL).
 <!--long-->
 **Merged**
 
+- [`deepset-ai/haystack` #12364](https://github.com/deepset-ai/haystack/pull/12364) —
+  `LinkContentFetcher` rotated its `User-Agent` on a cursor held by the component, but
+  `run()` fetches the URLs concurrently: a retry triggered by one URL advanced the user
+  agent for all the others, and each completed fetch reset the cursor underneath the
+  requests still in flight, so most retries went out un-rotated. Each fetch now walks the
+  list on its own. Closed the upstream issue.
+- [`deepset-ai/haystack` #12358](https://github.com/deepset-ai/haystack/pull/12358) —
+  `EmbeddingBasedDocumentSplitter.run_async` was only async for its first pass: the
+  recursive re-split of over-long chunks called the blocking embedder, running the most
+  expensive part of the work on the event loop. Shipped in the 3.1 milestone.
 - [`pyfenn/fenn` #277](https://github.com/pyfenn/fenn/pull/277) — added `.docx` support to
   the RAG document loader, so the framework ingests Word documents alongside PDFs and text.
 - [`pyfenn/fenn` #286](https://github.com/pyfenn/fenn/pull/286) — corrected the RAG
   optional-dependency install instructions, which referenced a package name that does
   not exist.
 
+Each Haystack fix ships a regression test I verified fails with the fix reverted, rather
+than passing either way.
+
 **Open**
 
+- [`deepset-ai/haystack-core-integrations` #3790](https://github.com/deepset-ai/haystack-core-integrations/pull/3790) —
+  `OAuthRefreshTokenSource` kept one `asyncio.Lock` for the life of the source. That lock
+  binds to the loop that first awaits it under contention and raises on any other, so a
+  source reused across event loops — one `asyncio.run` per request is a common deployment —
+  failed on the second loop's first contended refresh. Reported as issue #3789 and fixed
+  in the same PR.
+- [`deepset-ai/haystack` #12359](https://github.com/deepset-ai/haystack/pull/12359) —
+  `LLMDocumentContentExtractor.run_async` converted every document to an image inline:
+  reading files from disk, rendering PDF pages and base64-encoding them on the event loop
+  before the first LLM call was scheduled.
 - [`run-llama/llama_index`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333) —
   three fixes in `llama-index-core`, found by reading the retrieval and evaluation code
   rather than from an issue. [#22683](https://github.com/run-llama/llama_index/pull/22683):
@@ -378,20 +403,29 @@ outgrown rule-based filters (Python, `pgvector`, PostgreSQL).
   fix affecting Mailgun and Mailjet on Ruby 3.4.
 <!--/long-->
 <!--short:
-**Merged** — [`pyfenn/fenn` #277](https://github.com/pyfenn/fenn/pull/277) added `.docx`
-support to the RAG document loader; [#286](https://github.com/pyfenn/fenn/pull/286) fixed
-install instructions naming a package that does not exist.
+**Merged** — two concurrency fixes in
+[`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333),
+each with a regression test verified to fail with the fix reverted:
+[#12364](https://github.com/deepset-ai/haystack/pull/12364), a `User-Agent` rotation
+cursor shared by every URL of a concurrent fetch, so most retries went out un-rotated;
+[#12358](https://github.com/deepset-ai/haystack/pull/12358), an async splitter re-splitting
+over-long chunks through the blocking embedder, on the event loop.
+[`pyfenn/fenn` #277](https://github.com/pyfenn/fenn/pull/277) added `.docx` support to the
+RAG document loader; [#286](https://github.com/pyfenn/fenn/pull/286) fixed install
+instructions naming a package that does not exist.
 
-**Open** — [three fixes in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333):
+**Open** — two more in Haystack: an `asyncio.Lock` bound to the first event loop that
+contended for it, so an OAuth source reused across loops failed on the second
+([#3790](https://github.com/deepset-ai/haystack-core-integrations/pull/3790)), and PDF
+rendering on the event loop
+([#12359](https://github.com/deepset-ai/haystack/pull/12359)).
+[Three fixes in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333):
 retrieval metrics scoring above 1.0 on a repeated node id, MMR discounting a candidate
 only against the most recent result, and the multi-modal evaluator counting image nodes
-as text. [`rubocop-rspec` #2209](https://github.com/rubocop/rubocop-rspec/pull/2209) and
-[#2214](https://github.com/rubocop/rubocop-rspec/pull/2214): a crash and a bad autocorrect
-in `RSpec/LeadingSubject` on Ruby 3.4's implicit `it` block parameter.
-[`rubocop-performance` #529](https://github.com/rubocop/rubocop-performance/pull/529):
-invalid autocorrect in `case`/`in` pattern matching.
-[Four PRs to `Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333):
-three provider integrations and a Ruby 3.4 `NameError` fix.
+as text. In Ruby, three autocorrect and crash fixes in
+[`rubocop-rspec`](https://github.com/rubocop/rubocop-rspec/pull/2209) and
+[`rubocop-performance`](https://github.com/rubocop/rubocop-performance/pull/529), and
+[four PRs to `courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333).
 -->
 
 ---
