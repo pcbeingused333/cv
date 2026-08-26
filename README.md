@@ -382,7 +382,9 @@ outgrown rule-based filters (Python, `pgvector`, PostgreSQL).
   not exist.
 
 Each Haystack fix ships a regression test I verified fails with the fix reverted, rather
-than passing either way.
+than passing either way. I wrote the four concurrency ones up together, because they are
+one class of defect and three were invisible to the test suite for the same reason:
+[Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
 
 **Open**
 
