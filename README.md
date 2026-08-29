@@ -411,6 +411,16 @@ one class of defect and three were invisible to the test suite for the same reas
 - [`rubocop/rubocop-performance` #529](https://github.com/rubocop/rubocop-performance/pull/529) —
   fixed `Performance/ConstantRegexp` emitting invalid code when autocorrecting a regexp
   used as a pattern in `case`/`in` pattern matching.
+- [`rubyforgood/human-essentials` #5656](https://github.com/rubyforgood/human-essentials/pull/5656) —
+  a Rails inventory app for nonprofit essentials banks. Its participant drop-downs
+  displayed one column and were ordered by another, so the list was sorted on a value
+  the user could not see, and the tie-break fell through to the cluster's collation,
+  which does not match between CI and production. Now ordered on the name actually
+  rendered, with runs of digits compared by value so "Store 9" precedes "Store 10".
+  Brakeman flagged my first version as SQL injection for interpolating into `Arel.sql`,
+  so the expression is a literal constant with nothing interpolated. The maintainer also
+  asked for a survey of every other drop-down in the app, which I traced from each
+  rendered `<select>` back to the query that builds it.
 - [`Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333) —
   four PRs: MailerSend, Mailtrap and SMTP.com provider integrations, and a `NameError`
   fix affecting Mailgun and Mailjet on Ruby 3.4.
@@ -453,7 +463,7 @@ in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277), one in
 
 **Open** —
 [three in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
-on retrieval evaluation and MMR, and six in Ruby tooling.
+on retrieval evaluation and MMR, and seven across Ruby tooling and a Rails app.
 
 **Reported** — found by reading the code, filed with a reproduction: the cached lock above
 ([#3789](https://github.com/deepset-ai/haystack-core-integrations/issues/3789), triaged `P3`,
