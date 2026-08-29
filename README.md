@@ -3,7 +3,7 @@
 **Applied AI Engineer · Python / LLM**
 
 Remote — UTC−4 · Spanish (native), English (professional)
-[alex.castillog33@gmail.com](mailto:alex.castillog33@gmail.com) · [github.com/pcbeingused333](https://github.com/pcbeingused333) · [linkedin.com/in/alex-castillo-gonzalez](https://www.linkedin.com/in/alex-castillo-gonzalez-65a13110a/) · [portfolio-alexgonzalez33.vercel.app](https://portfolio-alexgonzalez33.vercel.app)
+[alex.castillog33@gmail.com](mailto:alex.castillog33@gmail.com) · [github.com/pcbeingused333](https://github.com/pcbeingused333) · [linkedin.com/in/alexcastillogonzalez](https://www.linkedin.com/in/alexcastillogonzalez) · [portfolio-alexgonzalez33.vercel.app](https://portfolio-alexgonzalez33.vercel.app)
 
 ---
 
