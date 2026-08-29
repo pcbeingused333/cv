@@ -380,6 +380,11 @@ outgrown rule-based filters (Python, `pgvector`, PostgreSQL).
 - [`pyfenn/fenn` #286](https://github.com/pyfenn/fenn/pull/286) — corrected the RAG
   optional-dependency install instructions, which referenced a package name that does
   not exist.
+- [`rubocop/rubocop-rspec` #2209](https://github.com/rubocop/rubocop-rspec/pull/2209) —
+  `RSpec/LeadingSubject` crashed on Ruby 3.4's implicit `it` block parameter: the cop
+  walked `:block` AST ancestors only, so an example group written as an `itblock` or
+  `numblock` was never found and the lookup returned `nil`. Widened to `:any_block`,
+  with a regression spec pinned to Ruby 3.4.
 
 Each Haystack fix ships a regression test I verified fails with the fix reverted, rather
 than passing either way. I wrote the four concurrency ones up together, because they are
@@ -400,10 +405,6 @@ one class of defect and three were invisible to the test suite for the same reas
   [#22685](https://github.com/run-llama/llama_index/pull/22685): the multi-modal evaluator
   scored image nodes as text results, because `ImageNode` subclasses `TextNode` and the two
   type checks were independent. Each ships with a test that fails without the fix.
-- [`rubocop/rubocop-rspec` #2209](https://github.com/rubocop/rubocop-rspec/pull/2209) —
-  fixed a crash in `RSpec/LeadingSubject` on Ruby 3.4's implicit `it` block parameter: the
-  cop only walked `:block` AST ancestors and hit `nil` on the new `itblock`/`numblock`
-  nodes. Widened the lookup to `:any_block`, with a regression spec.
 - [`rubocop/rubocop-rspec` #2214](https://github.com/rubocop/rubocop-rspec/pull/2214) —
   fixed `RSpec/LeadingSubject` autocorrecting a subject to a position above another
   subject.
@@ -434,7 +435,7 @@ bug report someone else has to reproduce first.
 <!--short:
 **Merged** — five fixes across
 [`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333)
-and its integrations, each with a regression test verified to fail with the fix reverted.
+and its integrations, each with a regression test that fails with the fix reverted.
 Four are concurrency defects: a `User-Agent` rotation cursor shared by every URL of a
 concurrent fetch, so most retries went out un-rotated
 ([#12364](https://github.com/deepset-ai/haystack/pull/12364)); an async splitter
@@ -447,7 +448,8 @@ cached across event loops, breaking an OAuth source reused in a new one
 three components dropping an init parameter from `to_dict`, so the setting silently
 reverted to its default whenever the pipeline was saved and reloaded
 ([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Two more
-merged in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277).
+in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277), one in
+[`rubocop/rubocop-rspec`](https://github.com/rubocop/rubocop-rspec/pull/2209).
 
 **Open** —
 [three in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
