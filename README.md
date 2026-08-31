@@ -18,8 +18,10 @@ ignores — every statement has to name the provision it came from, and the syst
 decline when the source does not cover the question. Both projects ship with the harness
 that measures them — retrieval, citation accuracy and abstention for the RAG system,
 tool trajectories and answer grounding for the MCP agent — and in each case the harness
-found defects the tests did not. Fullstack background across Python, TypeScript and
-Ruby, with production experience shipping and operating what I build. I also fix the
+found defects the tests did not. That measurement layer is now a published library,
+[`ragcite`](https://github.com/pcbeingused333/ragcite), which asserts that it reproduces the
+numbers of the project it was extracted from. Fullstack background across Python, TypeScript
+and Ruby, with production experience shipping and operating what I build. I also fix the
 frameworks this work runs on: five merged fixes in **Haystack**, deepset's framework for
 production RAG and agent pipelines — four concurrency defects on its async path, one
 serialization defect that changed how a component behaved after a reload; three open
@@ -27,16 +29,15 @@ fixes to the retrieval evaluation and MMR code in `llama-index-core`; and two me
 `pyfenn/fenn`.
 <!--/long-->
 <!--short:
-Applied AI engineer working in Python on retrieval and agent systems, and on the layer
-that decides whether they survive real users: evaluation and failure handling. My main
-retrieval project answers over the text of the **GDPR**, built around a constraint
-regulated domains impose and generic RAG ignores — every statement names the provision it
-came from, and the system declines when the source does not cover the question. Both
-projects ship with the harness that measures them, and in each case the harness found
-defects the tests did not. Fullstack background across Python, TypeScript and Ruby, plus
-five merged fixes in **Haystack**, deepset's framework for production RAG and agent
-pipelines, four of them concurrency defects on its async path, and three open fixes to
-the retrieval evaluation and MMR code in `llama-index-core`.
+Applied AI engineer working in Python on retrieval and agent systems, and on the layer that
+decides whether they survive real users: evaluation and failure handling. My main retrieval
+project answers over the text of the **GDPR**, built around a constraint regulated domains
+impose and generic RAG ignores — every statement names the provision it came from, and the
+system declines when the source does not cover the question. Both projects ship with the
+harness that measures them, and in each case the harness found defects the tests did not.
+Fullstack background across Python, TypeScript and Ruby, plus five merged fixes in
+**Haystack**, deepset's framework for production RAG and agent pipelines — four of them
+concurrency defects on its async path.
 -->
 
 ---
@@ -139,11 +140,9 @@ federation** · Docker · Vercel · Git · AI-assisted development (Claude Code,
   why the AI widget I later built was scoped to the four questions people really ask.
 <!--/long-->
 <!--short:
-- Ran the business single-handed: production, service, customers, purchasing, cash and
-  compliance. No staff to delegate to and no manager to escalate to — if it did not
-  work, it was mine to fix that morning.
-- Took it from a mobile trailer to fixed premises, rebuilding the operation around a
-  different site, different hours and a different customer base.
+- Ran the business single-handed — production, service, purchasing, cash and compliance,
+  with no one to delegate to or escalate to — and took it from a mobile trailer to fixed
+  premises, rebuilding the operation around a different site, hours and customer base.
 -->
 
 ### Le Wagon — Part-time Programming Teacher · Remote (France)
@@ -157,8 +156,7 @@ federation** · Docker · Vercel · Git · AI-assisted development (Claude Code,
 <!--/long-->
 <!--short:
 - Taught the new part-time flex cohort of the fullstack bootcamp — Ruby, OOP, SQL and
-  PostgreSQL, HTML/CSS/JavaScript and Ruby on Rails — supporting students through
-  exercises and live debugging.
+  PostgreSQL, HTML/CSS/JavaScript, Rails — through exercises and live debugging.
 -->
 
 ### TECNOBIT (Grupo Oesía) — Fullstack Developer · Valdepeñas, Spain
@@ -178,11 +176,10 @@ federation** · Docker · Vercel · Git · AI-assisted development (Claude Code,
 <!--short:
 - Shipped features into a long-running internal application maintained by a team of five,
   across a codebase distributed over both GitHub and GitLab.
-- **Backend:** Ruby routines pulling data from JSON files and the **Jira API**,
-  transforming and persisting it to PostgreSQL, with multi-stage validation gating
-  document generation and downloads.
-- **Frontend:** form-driven pages and PostgreSQL-backed views with role-dependent data,
-  surfacing backend subprocess state so users could follow a download to completion.
+- **Backend:** Ruby routines pulling data from JSON files and the **Jira API**, persisting
+  it to PostgreSQL with multi-stage validation gating document generation and downloads.
+  **Frontend:** form-driven pages and PostgreSQL-backed views with role-dependent data,
+  surfacing subprocess state so users could follow a download to completion.
 -->
 
 ---
@@ -193,9 +190,9 @@ federation** · Docker · Vercel · Git · AI-assisted development (Claude Code,
 [Live demo](https://mcp-business-agent-8wawhyaqt2flfixqj8dpnk.streamlit.app) · [Code](https://github.com/pcbeingused333/mcp-business-agent)
 
 A **Model Context Protocol server** exposing a business's operations (catalog, booking
-capacity, stock, quoting, orders) as tools any MCP client can call — Claude Desktop,
-Cursor, or the LangGraph agent bundled with it. The agent carries no business rules;
-tools are discovered at runtime, so adding one requires no agent change.
+capacity, stock, quoting, orders) as tools any MCP client can call — Claude Desktop, Cursor,
+or the LangGraph agent bundled with it. The agent carries no business rules: tools are
+discovered at runtime, so adding one requires no agent change.
 
 <!--long-->
 - Built an evaluation harness that scores **tool trajectories**, not just answers:
@@ -230,19 +227,18 @@ tools are discovered at runtime, so adding one requires no agent change.
 - **Deployed to AWS** as a remote MCP server — Lambda container behind a Function URL,
   DynamoDB single-table store, least-privilege IAM, all in Terraform. Storage sits behind
   an interface, so the same server runs on SQLite locally and DynamoDB in production.
-- CI/CD on every push via GitHub Actions authenticating with **OIDC** rather than a
-  stored key, scoped to one branch, and deliberately unable to apply infrastructure.
 - Python, MCP 2.0, LangGraph, Groq, AWS (Lambda, DynamoDB, ECR, IAM), Terraform, Docker,
-  GitHub Actions, pytest (161 tests).
+  pytest (161 tests). CI/CD on every push via GitHub Actions authenticating with **OIDC**
+  rather than a stored key, scoped to one branch and unable to apply infrastructure.
 -->
 
 ### Ask the GDPR — retrieval over regulation, with citations that can be checked
 [Live demo](https://rag-chatbot-demo-0.streamlit.app) · [Code](https://github.com/pcbeingused333/rag-chatbot-portfolio)
 
-LangGraph agent over the full text of the GDPR. Every answer names the provision behind
-it — `Art. 33(1)`, not a page number — and the system is built to decline when the
-source does not cover the question. Two modes behind one flag: an in-memory FAISS demo
-on a free 1 GB container, and a pgvector-backed production path.
+LangGraph agent over the full text of the GDPR. Every answer names the provision behind it —
+`Art. 33(1)`, not a page number — and the system declines when the source does not cover the
+question. Two modes behind one flag: an in-memory FAISS demo on a free 1 GB container, and a
+pgvector-backed production path.
 
 <!--long-->
 - **Made the citation structural rather than incidental.** A regulation is cited by
@@ -290,28 +286,57 @@ on a free 1 GB container, and a pgvector-backed production path.
 <!--/long-->
 <!--short:
 - **Made the citation structural rather than incidental.** A regulation is cited by
-  article and paragraph; the page a provision lands on is an artefact of typesetting.
-  So the corpus is not a PDF: a builder parses the Official Journal text from EUR-Lex
-  into **414 provisions** carrying article, paragraph and chapter as metadata, and the
-  chunk size was chosen so **97% of provisions survive as exactly one chunk** — a chunk
-  straddling Art. 33(1) and 33(2) gets attributed to one of them and cites the wrong
-  paragraph.
-- **Built an eval for the answers that should never be given.** In legal text a
-  retrieval miss announces itself; an invention is fluent, confident and
-  indistinguishable from a correct answer. So the harness scores refusal against
-  questions the Regulation does not answer but every model has read about — adequacy
-  decisions by country, Schrems II, a CCPA penalty — alongside a deterministic check for
-  citations appearing in the answer but never in the retrieved passages.
-- **Re-ran every measurement when the corpus changed, and one result reversed.**
-  Embedding the article heading measurably hurt retrieval under the old embedding model
-  and helped under the new one; carrying the first conclusion forward would have shipped
-  the worse setting on the strength of real evidence. The model swap was worth 8/20 →
-  13/20 at rank 1 for 42 MB, against a hard 1 GB ceiling.
-- CI on every push runs the suite headlessly including a boot test of the app itself —
-  the host redeploys straight from `main`, so the suite is the only gate before the
-  public demo.
-- Python, LangChain, LangGraph, Groq, FAISS, pgvector, Streamlit, Docker, GitHub
-  Actions, pytest (72 tests).
+  article and paragraph; the page a provision lands on is an artefact of typesetting. So
+  the corpus is not a PDF: a builder parses the Official Journal text from EUR-Lex into
+  **414 provisions** carrying article, paragraph and chapter as metadata, and the chunk
+  size was chosen so **97% survive as exactly one chunk** — a chunk straddling Art. 33(1)
+  and 33(2) cites the wrong paragraph.
+- **Built an eval for the answers that should never be given.** In legal text a retrieval
+  miss announces itself; an invention is fluent and indistinguishable from a correct
+  answer. The harness scores refusal against questions the Regulation does not answer but
+  every model has read about — adequacy decisions, Schrems II, a CCPA penalty — plus a
+  deterministic check for citations that appear in the answer and never in the passages.
+- **Re-ran every measurement when the corpus changed, and one result reversed.** Embedding
+  the article heading hurt retrieval under the old embedding model and helped under the
+  new one; carrying the first conclusion forward would have shipped the worse setting on
+  the strength of real evidence. The model swap was worth 8/20 → 13/20 at rank 1 for
+  42 MB, against a hard 1 GB ceiling.
+- Python, LangChain, LangGraph, Groq, FAISS, pgvector, Streamlit, Docker, GitHub Actions,
+  pytest (72 tests). CI runs headlessly on every push, including a boot test of the app —
+  the host redeploys straight from `main`, so the suite is the only gate before the demo.
+-->
+
+### ragcite — the evaluation layer of the two projects above, as a library
+[Code](https://github.com/pcbeingused333/ragcite)
+
+Retrieval metrics, citation grounding, abstention scoring and tool-trajectory scoring,
+extracted from the two harnesses above and generalized. No LangChain, vector store or LLM
+client is imported: you bring the retriever and the judge, `ragcite` scores what they return.
+
+<!--long-->
+- **It reproduces the numbers of the project it came from, and asserts it.** The dogfood
+  example scores one FAISS index twice — once with `ragcite`, once with the original
+  project's own independent metrics code — and exits non-zero if they disagree. They match
+  exactly (hit@1 13/25, recall@k 17/25, MRR 0.59), which is what makes "extracted from a
+  production harness" a check rather than a claim.
+- Retrieval and grounding need no model at all: `hit@1`/`recall@k`/`MRR` are id matching
+  and grounding is a set membership test, so both are deterministic and free to run on
+  every commit. A fabricated citation is caught however fluently it reads.
+- `--min-hit-at-1`, `--min-recall`, `--min-mrr` turn a run into a CI gate that exits 2 on
+  a regression. Without a threshold flag the command always exits 0 — a report, not a
+  gate, and it stays that way by default.
+- `check_judge_independence` refuses to run when the judge and the system under test are
+  the same model. That defect is why it exists: my own harness spent weeks marking a model
+  as its own examiner.
+- Zero runtime dependencies, MIT, 155 tests, CI on Python 3.9–3.12.
+<!--/long-->
+<!--short:
+- **It reproduces the numbers of the project it came from, and asserts it.** The dogfood
+  example scores one FAISS index twice — once with `ragcite`, once with the original
+  project's own independent metrics code — and exits non-zero if they disagree. They match
+  exactly (hit@1 13/25, recall@k 17/25, MRR 0.59).
+- Zero runtime dependencies, MIT, 155 tests, CI on Python 3.9–3.12. `--min-hit-at-1` turns
+  a run into a CI gate that exits 2 on a regression.
 -->
 
 <!--long-->
@@ -329,15 +354,7 @@ Recommendation engine built on vector embeddings with a feedback loop that refin
 results over time, as a reusable backend for platforms that have outgrown rule-based
 filters. Python, embeddings, pgvector, PostgreSQL.
 <!--/long-->
-<!--short:
-**Also** — [AI Website Chat Widget](https://ai-chat-widget-five-ashen.vercel.app)
-([code](https://github.com/pcbeingused333/ai-chat-widget)): drop-in assistant for
-small-business sites, grounded strictly in the business's own content and reusable for any
-client from a single config file (Next.js, React, TypeScript, Groq, Vercel).
-[Semantic Recommender](https://github.com/pcbeingused333/semantic-recommender):
-embedding-based recommendations with a feedback loop, as a backend for platforms that have
-outgrown rule-based filters (Python, `pgvector`, PostgreSQL).
--->
+
 
 ---
 
@@ -393,6 +410,18 @@ one class of defect and three were invisible to the test suite for the same reas
 
 **Open**
 
+- [`deepset-ai/haystack-core-integrations` #3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873)
+  and [`deepset-ai/haystack` #12518](https://github.com/deepset-ai/haystack/pull/12518) — the
+  same defect as #3808, found again by scripting the audit: a small AST pass comparing every
+  component's `__init__` parameters against the keys that reach `to_dict`. Five more settings
+  were being dropped across `google_vertex`, `transformers` and `amazon_bedrock`, and two in
+  Haystack itself. The one with teeth is `VertexAITextEmbedder.task_type`: it goes into every
+  `TextEmbeddingInput`, so a pipeline saved as `CODE_RETRIEVAL_QUERY` and reloaded starts
+  embedding as `RETRIEVAL_QUERY` — different vectors, no error. In each case a sibling
+  component in the same integration already serialized the parameter, and the existing tests
+  showed the omission was an oversight: one carried the three fields commented out with a
+  note that they "are not explicitly included in `to_dict`", another was parametrized over a
+  value that could not change its own assertion.
 - [`run-llama/llama_index`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333) —
   three fixes in `llama-index-core`, found by reading the retrieval and evaluation code
   rather than from an issue. [#22683](https://github.com/run-llama/llama_index/pull/22683):
@@ -430,6 +459,28 @@ one class of defect and three were invisible to the test suite for the same reas
 Defects found by reading the code, filed with a standalone reproduction rather than a
 bug report someone else has to reproduce first.
 
+- [`pydantic/pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) —
+  `pydantic-evals` renders a section of the judge's prompt by iterating anything that is a
+  `Sequence` and is not a `str`. `bytes`, `bytearray` and `memoryview` are all `Sequence`s,
+  so an eval task returning binary content had it rendered as one decimal byte value per
+  line: the judge graded `84 104 101 …` against the rubric and returned a plausible score
+  for content it never saw. No exception, no warning — the failure an eval framework must
+  not have. Reproduced through the public API with no provider key, using a stub model to
+  capture the prompt. Accepted for implementation.
+- [`pydantic/pydantic-ai` #7928](https://github.com/pydantic/pydantic-ai/issues/7928) — the
+  same report's averages give no denominator: an evaluator that scored 1 case of 4 renders
+  identically to one that scored all 4, and `report.averages()` — which the documentation
+  recommends for comparing implementations and validating changes before deployment —
+  exposes only the number. A judge exhausting its quota mid-run therefore reports a *higher*
+  score than the run earned, and a threshold check passes. Routed to maintainer discussion.
+- [`deepset-ai/haystack` #12519](https://github.com/deepset-ai/haystack/issues/12519) — `main`
+  was failing on every pull request because an `openai` release added three fields to its
+  usage models and two tests assert an exact usage dict. Bisected to the version, filed with
+  the reproduction; another contributor picked up the fix within the hour.
+- [`deepset-ai/haystack-core-integrations` #3874](https://github.com/deepset-ai/haystack-core-integrations/issues/3874) —
+  the `google_vertex` integration ships to PyPI with no CI workflow at all, and its suite is
+  already failing on `main` against the current `haystack-ai`. Found while getting local
+  evidence for the part of #3873 that CI cannot cover.
 - [`deepset-ai/haystack-core-integrations` #3789](https://github.com/deepset-ai/haystack-core-integrations/issues/3789) —
   the `asyncio.Lock` cached across event loops described above. Triaged `P3` by the
   maintainers; closed by #3790.
@@ -445,30 +496,28 @@ bug report someone else has to reproduce first.
 <!--short:
 **Merged** — five fixes across
 [`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333)
-and its integrations, each with a regression test that fails with the fix reverted.
-Four are concurrency defects: a `User-Agent` rotation cursor shared by every URL of a
-concurrent fetch, so most retries went out un-rotated
-([#12364](https://github.com/deepset-ai/haystack/pull/12364)); an async splitter
-re-splitting over-long chunks through the blocking embedder, on the event loop
-([#12358](https://github.com/deepset-ai/haystack/pull/12358)); PDF rendering and
-base64-encoding on the event loop before the first LLM call
-([#12359](https://github.com/deepset-ai/haystack/pull/12359)); and an `asyncio.Lock`
-cached across event loops, breaking an OAuth source reused in a new one
-([#3790](https://github.com/deepset-ai/haystack-core-integrations/pull/3790)). The fifth:
-three components dropping an init parameter from `to_dict`, so the setting silently
-reverted to its default whenever the pipeline was saved and reloaded
-([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Two more
-in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277), one in
+and its integrations, each with a regression test I verified fails with the fix reverted.
+Four are one class of concurrency defect on the async path — a `User-Agent` rotation cursor
+shared across a concurrent fetch, an `asyncio.Lock` cached across event loops, two paths
+doing blocking work on the event loop — three of them invisible to the test suite for the
+same reason, written up together:
+[Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
+The fifth: three components dropping an `__init__` parameter from `to_dict`, so the setting
+silently reverted to its default whenever a pipeline was saved and reloaded
+([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Two more in
+[`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277), one in
 [`rubocop/rubocop-rspec`](https://github.com/rubocop/rubocop-rspec/pull/2209).
 
-**Open** —
+**Open** — that audit, now scripted across every component: five more dropped settings in
+three integrations ([#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873))
+and two in Haystack itself ([#12518](https://github.com/deepset-ai/haystack/pull/12518)),
+including a `task_type` whose loss changes the embeddings a reloaded pipeline produces. Plus
 [three in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
-on retrieval evaluation and MMR, and seven across Ruby tooling and a Rails app.
-
-**Reported** — found by reading the code, filed with a reproduction: the cached lock above
-([#3789](https://github.com/deepset-ai/haystack-core-integrations/issues/3789), triaged `P3`,
-closed by my PR) and [`courrier` #58](https://github.com/Rails-Designer/courrier/issues/58) —
-`cc`/`bcc` silently dropped by 8 of the gem's 14 providers.
+on retrieval evaluation and MMR, and seven across Ruby tooling and a Rails app. Defects I
+only reported, each with a standalone reproduction, are triaged and taken up the same way:
+[`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) — `LLMJudge`
+grading a `bytes` output rendered as one decimal byte per line, no error — is accepted for
+implementation, and the cached lock above was triaged `P3` and closed by my own PR.
 -->
 
 ---
@@ -484,8 +533,5 @@ independent study alongside running the business, before moving back into
 engineering full time.
 <!--/long-->
 <!--short:
-**Le Wagon** — Fullstack Web Development bootcamp, 2022 (Ruby, Rails, JavaScript,
-SQL/PostgreSQL, HTML/CSS). **Self-directed, 2022–2025** — LaunchSchool coursework and
-independent study alongside running the business, before moving back into engineering
-full time.
+**Le Wagon** — Fullstack Web Development bootcamp, 2022. Self-directed study since.
 -->

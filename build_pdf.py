@@ -191,15 +191,15 @@ li { page-break-inside: avoid; }
 # version is that there is less to say, not that the same text is squeezed smaller. Type
 # below about 8.5pt stops being comfortable on paper, so the savings come from spacing.
 SHORT_TIGHTENING = """
-body { font-size: 8.6pt; line-height: 1.31; }
-@page { margin: 11mm 13mm 13mm; }
-h1 { font-size: 18pt; margin-bottom: 2.4mm; }
-h2 { font-size: 9.4pt; margin: 3.2mm 0 1.2mm; }
-h3 { font-size: 9.2pt; margin: 2.2mm 0 0.4mm; }
-p { margin: 0 0 1.2mm; }
-li { margin-bottom: 0.6mm; }
-ul { margin: 0 0 1.5mm; }
-hr { margin: 2.2mm 0 0; }
+body { font-size: 8.6pt; line-height: 1.28; }
+@page { margin: 10mm 12mm 12mm; }
+h1 { font-size: 18pt; margin-bottom: 2.2mm; }
+h2 { font-size: 9.4pt; margin: 2.4mm 0 0.9mm; }
+h3 { font-size: 9.2pt; margin: 1.8mm 0 0.3mm; }
+p { margin: 0 0 0.9mm; }
+li { margin-bottom: 0.3mm; }
+ul { margin: 0 0 1.0mm; }
+hr { margin: 1.6mm 0 0; }
 """
 
 
