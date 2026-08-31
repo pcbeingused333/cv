@@ -24,9 +24,9 @@ numbers of the project it was extracted from. Fullstack background across Python
 and Ruby, with production experience shipping and operating what I build. I also fix the
 frameworks this work runs on: five merged fixes in **Haystack**, deepset's framework for
 production RAG and agent pipelines — four concurrency defects on its async path, one
-serialization defect that changed how a component behaved after a reload; three open
-fixes to the retrieval evaluation and MMR code in `llama-index-core`; and two merged in
-`pyfenn/fenn`.
+serialization defect that changed how a component behaved after a reload; a merged fix to
+`pydantic-ai`'s eval framework; three open fixes to the retrieval evaluation and MMR code
+in `llama-index-core`; and two merged in `pyfenn/fenn`.
 <!--/long-->
 <!--short:
 Applied AI engineer working in Python on retrieval and agent systems, and on the layer that
@@ -392,6 +392,14 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   trip; a TEI ranker that stops asking the endpoint for raw scores; and a Ragas evaluator
   falling from 16 concurrent LLM judgements back to 4. Found by auditing `to_dict` against
   `__init__` across the integrations, not from an issue.
+- [`pydantic/pydantic-ai` #7936](https://github.com/pydantic/pydantic-ai/pull/7936) —
+  `pydantic-evals` reads `expected_output=None` as "no expectation", so a `Case` written to
+  assert that a task returns `None` is skipped instead: `EqualsExpected` records no
+  assertion and the case averages 1.0 whether the task returns `None` or the wrong answer
+  outright. The sentinel and the legitimate value are the same object. The maintainers hold
+  the skip as intended, so the fix is documentation — the trap is now stated where the
+  behaviour is defined, and `Equals(value=None)` named as the evaluator that does assert it.
+  Reported as #7934 with a runnable reproduction; closed by this PR.
 - [`pyfenn/fenn` #277](https://github.com/pyfenn/fenn/pull/277) — added `.docx` support to
   the RAG document loader, so the framework ingests Word documents alongside PDFs and text.
 - [`pyfenn/fenn` #286](https://github.com/pyfenn/fenn/pull/286) — corrected the RAG
@@ -402,6 +410,12 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   walked `:block` AST ancestors only, so an example group written as an `itblock` or
   `numblock` was never found and the lookup returned `nil`. Widened to `:any_block`,
   with a regression spec pinned to Ruby 3.4.
+- [`Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) —
+  four merged in a Ruby mailer gem: MailerSend, Mailtrap and SMTP.com provider
+  integrations, which closed the gem's standing request for more providers, and a
+  `NameError` that broke Mailgun and Mailjet on Ruby 3.4 — `Base64` left the default gems
+  and those two were the only providers calling it without requiring it, so the gem
+  installed fine and raised on send.
 
 Each Haystack fix ships a regression test I verified fails with the fix reverted, rather
 than passing either way. I wrote the four concurrency ones up together, because they are
@@ -413,15 +427,16 @@ one class of defect and three were invisible to the test suite for the same reas
 - [`deepset-ai/haystack-core-integrations` #3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873)
   and [`deepset-ai/haystack` #12518](https://github.com/deepset-ai/haystack/pull/12518) — the
   same defect as #3808, found again by scripting the audit: a small AST pass comparing every
-  component's `__init__` parameters against the keys that reach `to_dict`. Five more settings
-  were being dropped across `google_vertex`, `transformers` and `amazon_bedrock`, and two in
-  Haystack itself. The one with teeth is `VertexAITextEmbedder.task_type`: it goes into every
-  `TextEmbeddingInput`, so a pipeline saved as `CODE_RETRIEVAL_QUERY` and reloaded starts
-  embedding as `RETRIEVAL_QUERY` — different vectors, no error. In each case a sibling
-  component in the same integration already serialized the parameter, and the existing tests
-  showed the omission was an oversight: one carried the three fields commented out with a
-  note that they "are not explicitly included in `to_dict`", another was parametrized over a
-  value that could not change its own assertion.
+  component's `__init__` parameters against the keys that reach `to_dict`. Four more settings
+  were being dropped, two in the `transformers` and `amazon_bedrock` integrations and two in
+  Haystack itself, each one a value a reloaded pipeline goes on using at its default with
+  nothing to show it was ever set: the botocore config behind an S3 downloader's timeouts and
+  retries, the threshold deciding which overlapping answers an extractive reader discards.
+  A sibling component already serialized the parameter in each case, and the existing tests
+  showed the omission was an oversight — one was parametrized over a value that could not
+  change its own assertion. The audit's first version also flagged `google_vertex`; a
+  maintainer pointed out on my issue #3874 that the integration is archived, so I dropped
+  that commit and the PR now covers the two active ones.
 - [`run-llama/llama_index`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333) —
   three fixes in `llama-index-core`, found by reading the retrieval and evaluation code
   rather than from an issue. [#22683](https://github.com/run-llama/llama_index/pull/22683):
@@ -450,9 +465,14 @@ one class of defect and three were invisible to the test suite for the same reas
   so the expression is a literal constant with nothing interpolated. The maintainer also
   asked for a survey of every other drop-down in the app, which I traced from each
   rendered `<select>` back to the query that builds it.
-- [`Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333) —
-  four PRs: MailerSend, Mailtrap and SMTP.com provider integrations, and a `NameError`
-  fix affecting Mailgun and Mailjet on Ruby 3.4.
+- [`Rails-Designer/courrier` #62](https://github.com/Rails-Designer/courrier/pull/62) —
+  the gem accepts `cc:` and `bcc:` on every email and six of its providers never read them,
+  so the copies were dropped with no warning. I reported it as #58; the maintainer asked for
+  the PR. Each provider now takes them in the shape its own API wants, which for SparkPost
+  is not a field at all: every copy is a recipient there, and what separates a cc from a bcc
+  is whether the address is repeated in the CC header. Reading the lists through one helper
+  also fixes Mailjet, SendGrid and SparkPost sending several `to:` addresses as a single
+  malformed one — filed as #59, closed as done, still reproducible on `main`.
 
 **Reported**
 
@@ -476,19 +496,10 @@ bug report someone else has to reproduce first.
 - [`deepset-ai/haystack` #12519](https://github.com/deepset-ai/haystack/issues/12519) — `main`
   was failing on every pull request because an `openai` release added three fields to its
   usage models and two tests assert an exact usage dict. Bisected to the version, filed with
-  the reproduction; another contributor picked up the fix within the hour.
-- [`deepset-ai/haystack-core-integrations` #3874](https://github.com/deepset-ai/haystack-core-integrations/issues/3874) —
-  the `google_vertex` integration ships to PyPI with no CI workflow at all, and its suite is
-  already failing on `main` against the current `haystack-ai`. Found while getting local
-  evidence for the part of #3873 that CI cannot cover.
+  the reproduction; a maintainer merged the fix the same day.
 - [`deepset-ai/haystack-core-integrations` #3789](https://github.com/deepset-ai/haystack-core-integrations/issues/3789) —
   the `asyncio.Lock` cached across event loops described above. Triaged `P3` by the
   maintainers; closed by #3790.
-- [`Rails-Designer/courrier` #58](https://github.com/Rails-Designer/courrier/issues/58) —
-  `cc` and `bcc` accepted by the public API and silently dropped by 8 of the gem's 14
-  email providers, so the recipients are never on the message that goes out.
-- [`Rails-Designer/courrier` #59](https://github.com/Rails-Designer/courrier/issues/59) —
-  Mailjet sends multiple recipients as one malformed address.
 - [`pyfenn/fenn` #285](https://github.com/pyfenn/fenn/issues/285) — RAG
   optional-dependency errors pointing at a package and extras that do not exist; closed
   by #286 above.
@@ -504,16 +515,17 @@ same reason, written up together:
 [Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
 The fifth: three components dropping an `__init__` parameter from `to_dict`, so the setting
 silently reverted to its default whenever a pipeline was saved and reloaded
-([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Two more in
-[`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277), one in
-[`rubocop/rubocop-rspec`](https://github.com/rubocop/rubocop-rspec/pull/2209).
+([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Also merged:
+a documentation fix in [`pydantic-ai`](https://github.com/pydantic/pydantic-ai/pull/7936) for
+an eval case that could not fail, two in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277),
+and five across Ruby tooling and a mailer gem.
 
-**Open** — that audit, now scripted across every component: five more dropped settings in
-three integrations ([#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873))
-and two in Haystack itself ([#12518](https://github.com/deepset-ai/haystack/pull/12518)),
-including a `task_type` whose loss changes the embeddings a reloaded pipeline produces. Plus
+**Open** — that audit, now scripted across every component: two more dropped settings in the
+integrations ([#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873))
+and two in Haystack itself ([#12518](https://github.com/deepset-ai/haystack/pull/12518)). Plus
 [three in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
-on retrieval evaluation and MMR, and seven across Ruby tooling and a Rails app. Defects I
+on retrieval evaluation and MMR, and four across Ruby tooling, a Rails app and a mailer gem.
+Defects I
 only reported, each with a standalone reproduction, are triaged and taken up the same way:
 [`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) — `LLMJudge`
 grading a `bytes` output rendered as one decimal byte per line, no error — is accepted for
