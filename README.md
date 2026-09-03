@@ -2,7 +2,7 @@
 
 **Applied AI Engineer · Python / LLM**
 
-Remote — UTC−4 · Spanish (native), English (professional)
+Santo Domingo, Dominican Republic — UTC−4 · Independent contractor (Spanish passport) · Spanish (native), English (professional)
 [alex.castillog33@gmail.com](mailto:alex.castillog33@gmail.com) · [github.com/pcbeingused333](https://github.com/pcbeingused333) · [linkedin.com/in/alexcastillogonzalez](https://www.linkedin.com/in/alexcastillogonzalez) · [portfolio-alexgonzalez33.vercel.app](https://portfolio-alexgonzalez33.vercel.app)
 
 ---
@@ -29,15 +29,14 @@ serialization defect that changed how a component behaved after a reload; a merg
 in `llama-index-core`; and two merged in `pyfenn/fenn`.
 <!--/long-->
 <!--short:
-Applied AI engineer working in Python on retrieval and agent systems, and on the layer that
-decides whether they survive real users: evaluation and failure handling. My main retrieval
-project answers over the text of the **GDPR**, built around a constraint regulated domains
-impose and generic RAG ignores — every statement names the provision it came from, and the
-system declines when the source does not cover the question. Both projects ship with the
-harness that measures them, and in each case the harness found defects the tests did not.
-Fullstack background across Python, TypeScript and Ruby, plus five merged fixes in
-**Haystack**, deepset's framework for production RAG and agent pipelines — four of them
-concurrency defects on its async path.
+Applied AI engineer in Python: two retrieval and agent systems in production, each shipping
+the harness that measures it, and **thirteen merged pull requests** this year into the
+frameworks they run on. My main project answers over the text of the **GDPR** under a
+constraint generic RAG ignores — every statement names the provision it came from, and the
+system declines when the source does not cover the question. In both projects the harness
+found defects the tests did not. Fullstack across Python, TypeScript and Ruby; five of those
+merged fixes are in **Haystack**, deepset's framework for production RAG and agent
+pipelines, four of them concurrency defects on its async path.
 -->
 
 ---
@@ -505,7 +504,7 @@ bug report someone else has to reproduce first.
   by #286 above.
 <!--/long-->
 <!--short:
-**Merged** — five fixes across
+**Merged — thirteen pull requests this year.** Five across
 [`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333)
 and its integrations, each with a regression test I verified fails with the fix reverted.
 Four are one class of concurrency defect on the async path — a `User-Agent` rotation cursor
