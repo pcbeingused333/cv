@@ -435,9 +435,12 @@ one class of defect and three were invisible to the test suite for the same reas
   showed the omission was an oversight — one was parametrized over a value that could not
   change its own assertion. The audit's first version also flagged `google_vertex`; a
   maintainer pointed out on my issue #3874 that the integration is archived, so I dropped
-  that commit and the PR now covers the two active ones.
+  that commit and the PR now covers the two active ones. A later run of the same audit
+  caught [#3923](https://github.com/deepset-ai/haystack-core-integrations/pull/3923):
+  `NvidiaGenerator` drops its request `timeout` from `to_dict` while its four sibling Nvidia
+  components serialize it, so a reloaded pipeline silently falls back to the 60s default.
 - [`run-llama/llama_index`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333) —
-  three fixes in `llama-index-core`, found by reading the retrieval and evaluation code
+  five fixes in `llama-index-core`, found by reading the retrieval and evaluation code
   rather than from an issue. [#22683](https://github.com/run-llama/llama_index/pull/22683):
   the retrieval metrics scored outside their own range when a ranking repeated a node id,
   which is what fusion retrievers produce — hit rate and average precision returned 2.0,
@@ -447,7 +450,15 @@ one class of defect and three were invisible to the test suite for the same reas
   re-entered the ranking as soon as an unrelated result was picked in between.
   [#22685](https://github.com/run-llama/llama_index/pull/22685): the multi-modal evaluator
   scored image nodes as text results, because `ImageNode` subclasses `TextNode` and the two
-  type checks were independent. Each ships with a test that fails without the fix.
+  type checks were independent.
+  [#22968](https://github.com/run-llama/llama_index/pull/22968): `default_parser`, the
+  default parser for the judge output behind `CorrectnessEvaluator`, split a two-line
+  response and raised `ValueError` — aborting the eval run — when the judge returned a
+  score with no reasoning line.
+  [#22969](https://github.com/run-llama/llama_index/pull/22969):
+  `CohereRerankRelevancyMetric` guarded a missing API-key variable with `except IndexError`,
+  but a missing environment variable raises `KeyError`, so the intended "pass in an API key"
+  error never replaced the bare traceback. Each ships with a test that fails without the fix.
 - [`rubocop/rubocop-rspec` #2214](https://github.com/rubocop/rubocop-rspec/pull/2214) —
   fixed `RSpec/LeadingSubject` autocorrecting a subject to a position above another
   subject.
@@ -507,10 +518,8 @@ bug report someone else has to reproduce first.
 **Merged — thirteen pull requests this year.** Five across
 [`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333)
 and its integrations, each with a regression test I verified fails with the fix reverted.
-Four are one class of concurrency defect on the async path — a `User-Agent` rotation cursor
-shared across a concurrent fetch, an `asyncio.Lock` cached across event loops, two paths
-doing blocking work on the event loop — three of them invisible to the test suite for the
-same reason, written up together:
+Four are one class of concurrency defect on the async path, three of them invisible to the
+test suite for the same reason, written up together:
 [Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
 The fifth: three components dropping an `__init__` parameter from `to_dict`, so the setting
 silently reverted to its default whenever a pipeline was saved and reloaded
@@ -519,11 +528,13 @@ a documentation fix in [`pydantic-ai`](https://github.com/pydantic/pydantic-ai/p
 an eval case that could not fail, two in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277),
 and five across Ruby tooling and a mailer gem.
 
-**Open** — that audit, now scripted across every component: two more dropped settings in the
-integrations ([#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873))
-and two in Haystack itself ([#12518](https://github.com/deepset-ai/haystack/pull/12518)). Plus
-[three in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
-on retrieval evaluation and MMR, and four across Ruby tooling, a Rails app and a mailer gem.
+**Open** — that audit, now scripted across every component: three more dropped settings in
+the integrations ([#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873),
+[#3923](https://github.com/deepset-ai/haystack-core-integrations/pull/3923)) and two in
+Haystack itself ([#12518](https://github.com/deepset-ai/haystack/pull/12518)). Plus
+[five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
+on retrieval metrics, MMR and evaluation, and four across Ruby tooling, a Rails app and a
+mailer gem.
 Defects I
 only reported, each with a standalone reproduction, are triaged and taken up the same way:
 [`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) — `LLMJudge`
