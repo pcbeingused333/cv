@@ -25,12 +25,12 @@ and Ruby, with production experience shipping and operating what I build. I also
 frameworks this work runs on: five merged fixes in **Haystack**, deepset's framework for
 production RAG and agent pipelines — four concurrency defects on its async path, one
 serialization defect that changed how a component behaved after a reload; a merged fix to
-`pydantic-ai`'s eval framework; three open fixes to the retrieval evaluation and MMR code
+`pydantic-ai`'s eval framework; five open fixes to the retrieval evaluation and MMR code
 in `llama-index-core`; and two merged in `pyfenn/fenn`.
 <!--/long-->
 <!--short:
 Applied AI engineer in Python: two retrieval and agent systems in production, each shipping
-the harness that measures it, and **thirteen merged pull requests** this year into the
+the harness that measures it, and **fourteen merged pull requests** this year into the
 frameworks they run on. My main project answers over the text of the **GDPR** under a
 constraint generic RAG ignores — every statement names the provision it came from, and the
 system declines when the source does not cover the question. In both projects the harness
@@ -410,11 +410,17 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   `numblock` was never found and the lookup returned `nil`. Widened to `:any_block`,
   with a regression spec pinned to Ruby 3.4.
 - [`Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) —
-  four merged in a Ruby mailer gem: MailerSend, Mailtrap and SMTP.com provider
-  integrations, which closed the gem's standing request for more providers, and a
-  `NameError` that broke Mailgun and Mailjet on Ruby 3.4 — `Base64` left the default gems
-  and those two were the only providers calling it without requiring it, so the gem
-  installed fine and raised on send.
+  five merged in a Ruby mailer gem, all shipped in its 1.1.0 release: MailerSend, Mailtrap
+  and SMTP.com provider integrations, which closed the gem's standing request for more
+  providers; a `NameError` that broke Mailgun and Mailjet on Ruby 3.4 — `Base64` left the
+  default gems and those two were the only providers calling it without requiring it, so the
+  gem installed fine and raised on send; and `cc:`/`bcc:` delivery, which the gem accepted on
+  every email while six providers silently dropped it. I reported that one as #58; the
+  maintainer asked for the PR. Each provider now takes the copies in the shape its own API
+  wants, which for SparkPost is not a field at all — every copy is a recipient there, and
+  what separates a cc from a bcc is whether the address repeats in the CC header. Reading the
+  lists through one helper also fixes Mailjet, SendGrid and SparkPost sending several `to:`
+  addresses as a single malformed one — filed as #59.
 
 Each Haystack fix ships a regression test I verified fails with the fix reverted, rather
 than passing either way. I wrote the four concurrency ones up together, because they are
@@ -475,15 +481,6 @@ one class of defect and three were invisible to the test suite for the same reas
   so the expression is a literal constant with nothing interpolated. The maintainer also
   asked for a survey of every other drop-down in the app, which I traced from each
   rendered `<select>` back to the query that builds it.
-- [`Rails-Designer/courrier` #62](https://github.com/Rails-Designer/courrier/pull/62) —
-  the gem accepts `cc:` and `bcc:` on every email and six of its providers never read them,
-  so the copies were dropped with no warning. I reported it as #58; the maintainer asked for
-  the PR. Each provider now takes them in the shape its own API wants, which for SparkPost
-  is not a field at all: every copy is a recipient there, and what separates a cc from a bcc
-  is whether the address is repeated in the CC header. Reading the lists through one helper
-  also fixes Mailjet, SendGrid and SparkPost sending several `to:` addresses as a single
-  malformed one — filed as #59, closed as done, still reproducible on `main`.
-
 **Reported**
 
 Defects found by reading the code, filed with a standalone reproduction rather than a
@@ -515,7 +512,7 @@ bug report someone else has to reproduce first.
   by #286 above.
 <!--/long-->
 <!--short:
-**Merged — thirteen pull requests this year.** Five across
+**Merged — fourteen pull requests this year.** Five across
 [`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333)
 and its integrations, each with a regression test I verified fails with the fix reverted.
 Four are one class of concurrency defect on the async path, three of them invisible to the
@@ -526,15 +523,14 @@ silently reverted to its default whenever a pipeline was saved and reloaded
 ([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Also merged:
 a documentation fix in [`pydantic-ai`](https://github.com/pydantic/pydantic-ai/pull/7936) for
 an eval case that could not fail, two in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277),
-and five across Ruby tooling and a mailer gem.
+and six across Ruby tooling and a mailer gem — the last five shipped in `courrier` 1.1.0.
 
 **Open** — that audit, now scripted across every component: three more dropped settings in
 the integrations ([#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873),
 [#3923](https://github.com/deepset-ai/haystack-core-integrations/pull/3923)) and two in
 Haystack itself ([#12518](https://github.com/deepset-ai/haystack/pull/12518)). Plus
 [five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
-on retrieval metrics, MMR and evaluation, and four across Ruby tooling, a Rails app and a
-mailer gem.
+on retrieval metrics, MMR and evaluation, and three across Ruby tooling and a Rails app.
 Defects I
 only reported, each with a standalone reproduction, are triaged and taken up the same way:
 [`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) — `LLMJudge`
