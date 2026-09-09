@@ -22,21 +22,22 @@ found defects the tests did not. That measurement layer is now a published libra
 [`ragcite`](https://github.com/pcbeingused333/ragcite), which asserts that it reproduces the
 numbers of the project it was extracted from. Fullstack background across Python, TypeScript
 and Ruby, with production experience shipping and operating what I build. I also fix the
-frameworks this work runs on: five merged fixes in **Haystack**, deepset's framework for
-production RAG and agent pipelines — four concurrency defects on its async path, one
-serialization defect that changed how a component behaved after a reload; a merged fix to
-`pydantic-ai`'s eval framework; five open fixes to the retrieval evaluation and MMR code
-in `llama-index-core`; and two merged in `pyfenn/fenn`.
+frameworks this work runs on — **twenty-two merged pull requests** this year. Seven are in
+**Haystack** and its integrations, deepset's framework for production RAG and agent
+pipelines: four concurrency defects on the async path, three serialization defects that
+changed how a component behaved after a reload. Six more are in **LangChain.rb**. Plus a
+fix to `pydantic-ai`'s eval framework, two in `pyfenn/fenn`, and open fixes to the
+retrieval-evaluation and MMR code in `llama-index-core`.
 <!--/long-->
 <!--short:
 Applied AI engineer in Python: two retrieval and agent systems in production, each shipping
-the harness that measures it, and **fourteen merged pull requests** this year into the
+the harness that measures it, and **twenty-two merged pull requests** this year into the
 frameworks they run on. My main project answers over the text of the **GDPR** under a
 constraint generic RAG ignores — every statement names the provision it came from, and the
 system declines when the source does not cover the question. In both projects the harness
-found defects the tests did not. Fullstack across Python, TypeScript and Ruby; five of those
-merged fixes are in **Haystack**, deepset's framework for production RAG and agent
-pipelines, four of them concurrency defects on its async path.
+found defects the tests did not. Fullstack across Python, TypeScript and Ruby; seven of those
+merged fixes are in **Haystack** and its integrations (deepset's RAG and agent framework),
+four of them concurrency defects on the async path, and six in **LangChain.rb**.
 -->
 
 ---
@@ -376,6 +377,16 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   `EmbeddingBasedDocumentSplitter.run_async` was only async for its first pass: the
   recursive re-split of over-long chunks called the blocking embedder, running the most
   expensive part of the work on the event loop. Shipped in the 3.1 milestone.
+- [`deepset-ai/haystack` #12518](https://github.com/deepset-ai/haystack/pull/12518) —
+  `OpenAIImageGenerator` stored `timeout` and `max_retries`, used them to build its client
+  and left both out of `to_dict`, so a reloaded pipeline came back on the 30-second and
+  5-retry defaults. Its three siblings already serialize them. Found by an AST audit of
+  `__init__` against `to_dict`; the giveaway was the component's own test, which passed
+  `timeout=60` and asserted a dict containing neither.
+- [`deepset-ai/haystack-core-integrations` #3925](https://github.com/deepset-ai/haystack-core-integrations/pull/3925) —
+  same audit: `AzureAISearchDocumentStore` dropped `include_search_metadata` from `to_dict`,
+  the flag that decides whether Azure's `@search.*` fields are attached to every retrieved
+  document, so the setting silently reverted on reload.
 - [`deepset-ai/haystack-core-integrations` #3790](https://github.com/deepset-ai/haystack-core-integrations/pull/3790) —
   `OAuthRefreshTokenSource` kept one `asyncio.Lock` for the life of the source. That lock
   binds to the loop that first awaits it under contention and raises on any other, so a
@@ -399,6 +410,14 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   the skip as intended, so the fix is documentation — the trap is now stated where the
   behaviour is defined, and `Equals(value=None)` named as the evaluator that does assert it.
   Reported as #7934 with a runnable reproduction; closed by this PR.
+- [`patterns-ai-core/langchainrb`](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) —
+  six merged in the Ruby LLM framework, all edge cases that crashed a caller instead of
+  degrading: the JSONL loader raising on a blank line, `#tool_calls` raising `NoMethodError`
+  on a response with no usable choices (an error payload, a content-filtered completion) or
+  an explicit `"tool_calls": null` — which is what closed the year-old issue #1011 — the
+  directory loader returning an exception object into the results array, and
+  `AnthropicResponse#tool_calls` returning only the first `tool_use` block, silently dropping
+  Claude's parallel tool calls. Each ships a regression test.
 - [`pyfenn/fenn` #277](https://github.com/pyfenn/fenn/pull/277) — added `.docx` support to
   the RAG document loader, so the framework ingests Word documents alongside PDFs and text.
 - [`pyfenn/fenn` #286](https://github.com/pyfenn/fenn/pull/286) — corrected the RAG
@@ -429,22 +448,20 @@ one class of defect and three were invisible to the test suite for the same reas
 
 **Open**
 
-- [`deepset-ai/haystack-core-integrations` #3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873)
-  and [`deepset-ai/haystack` #12518](https://github.com/deepset-ai/haystack/pull/12518) — the
-  same defect as #3808, found again by scripting the audit: a small AST pass comparing every
-  component's `__init__` parameters against the keys that reach `to_dict`. Four more settings
-  were being dropped, two in the `transformers` and `amazon_bedrock` integrations and two in
-  Haystack itself, each one a value a reloaded pipeline goes on using at its default with
-  nothing to show it was ever set: the botocore config behind an S3 downloader's timeouts and
-  retries, the threshold deciding which overlapping answers an extractive reader discards.
-  A sibling component already serialized the parameter in each case, and the existing tests
-  showed the omission was an oversight — one was parametrized over a value that could not
-  change its own assertion. The audit's first version also flagged `google_vertex`; a
-  maintainer pointed out on my issue #3874 that the integration is archived, so I dropped
-  that commit and the PR now covers the two active ones. A later run of the same audit
-  caught [#3923](https://github.com/deepset-ai/haystack-core-integrations/pull/3923):
-  `NvidiaGenerator` drops its request `timeout` from `to_dict` while its four sibling Nvidia
-  components serialize it, so a reloaded pipeline silently falls back to the 60s default.
+- [`deepset-ai/haystack-core-integrations` #3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873) —
+  the same defect as #3808, found again by scripting the audit as an AST pass comparing every
+  component's `__init__` parameters against the keys that reach `to_dict`. Two more settings
+  dropped: the botocore config behind an S3 downloader's timeouts and retries, and the
+  threshold deciding which overlapping answers an extractive reader discards. A sibling
+  component already serialized the parameter in each case, and the existing tests showed the
+  omission was an oversight — one was parametrized over a value that could not change its own
+  assertion. The audit's first version also flagged `google_vertex`; a maintainer pointed out
+  on my issue #3874 that the integration is archived, so I dropped that commit.
+- [`deepset-ai/haystack-core-integrations` #3926](https://github.com/deepset-ai/haystack-core-integrations/pull/3926) —
+  sync/async parity, the same class as the concurrency fixes above: `CohereDocumentEmbedder`'s
+  sync path batches `texts` in slices of `batch_size` before calling the embed endpoint, and
+  `run_async` sent them all in one call — so on more documents than the endpoint's per-call
+  cap, the async path fails where the sync path works.
 - [`run-llama/llama_index`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333) —
   five fixes in `llama-index-core`, found by reading the retrieval and evaluation code
   rather than from an issue. [#22683](https://github.com/run-llama/llama_index/pull/22683):
@@ -512,30 +529,32 @@ bug report someone else has to reproduce first.
   by #286 above.
 <!--/long-->
 <!--short:
-**Merged — fourteen pull requests this year.** Five across
+**Merged — twenty-two pull requests this year.** Seven across
 [`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333)
 and its integrations, each with a regression test I verified fails with the fix reverted.
 Four are one class of concurrency defect on the async path, three of them invisible to the
 test suite for the same reason, written up together:
 [Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
-The fifth: three components dropping an `__init__` parameter from `to_dict`, so the setting
-silently reverted to its default whenever a pipeline was saved and reloaded
+The other three are serialization defects — a component dropping an `__init__` parameter
+from `to_dict`, so the setting silently reverted to its default whenever a pipeline was
+saved and reloaded, found by an AST audit of `__init__` against `to_dict`
 ([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Also merged:
-a documentation fix in [`pydantic-ai`](https://github.com/pydantic/pydantic-ai/pull/7936) for
-an eval case that could not fail, two in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277),
-and six across Ruby tooling and a mailer gem — the last five shipped in `courrier` 1.1.0.
+[six in `LangChain.rb`](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged),
+edge cases that crashed a caller instead of degrading; a documentation fix in
+[`pydantic-ai`](https://github.com/pydantic/pydantic-ai/pull/7936) for an eval case that
+could not fail; two in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277); and six
+across Ruby tooling and a mailer gem — the last five shipped in `courrier` 1.1.0.
 
-**Open** — that audit, now scripted across every component: three more dropped settings in
-the integrations ([#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873),
-[#3923](https://github.com/deepset-ai/haystack-core-integrations/pull/3923)) and two in
-Haystack itself ([#12518](https://github.com/deepset-ai/haystack/pull/12518)). Plus
-[five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
-on retrieval metrics, MMR and evaluation, and three across Ruby tooling and a Rails app.
-Defects I
-only reported, each with a standalone reproduction, are triaged and taken up the same way:
-[`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) — `LLMJudge`
-grading a `bytes` output rendered as one decimal byte per line, no error — is accepted for
-implementation, and the cached lock above was triaged `P3` and closed by my own PR.
+**Open** — the same audit, scripted across every component:
+[#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873) and a sync/async
+batching parity fix ([#3926](https://github.com/deepset-ai/haystack-core-integrations/pull/3926)).
+Plus [five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
+on retrieval metrics, MMR and evaluation, and open fixes across Ruby tooling and a Rails app.
+Defects I only reported, each with a standalone reproduction, are triaged and taken up the
+same way: [`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) —
+`LLMJudge` grading a `bytes` output rendered as one decimal byte per line, no error — is
+accepted for implementation, and the cached lock above was triaged `P3` and closed by my
+own PR.
 -->
 
 ---
