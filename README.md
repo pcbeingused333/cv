@@ -498,6 +498,29 @@ one class of defect and three were invisible to the test suite for the same reas
   so the expression is a literal constant with nothing interpolated. The maintainer also
   asked for a survey of every other drop-down in the app, which I traced from each
   rendered `<select>` back to the query that builds it.
+- [`confident-ai/deepeval`](https://github.com/confident-ai/deepeval/pulls?q=is%3Apr+author%3Apcbeingused333) —
+  four fixes in an LLM-evaluation framework, found by reading the metric and benchmark
+  code rather than from an issue.
+  [#3270](https://github.com/confident-ai/deepeval/pull/3270): a custom judge model
+  returning `(text, cost)` worked under `a_measure()` and raised `AttributeError` under
+  `measure()` — the async helper unwrapped that tuple, the sync one never did.
+  [#3271](https://github.com/confident-ai/deepeval/pull/3271): `TruthfulQA`'s MC2 scorer
+  counted every repeated correct index in a model's structured output, so a repeated
+  answer pushed the percentage past 100.
+  [#3272](https://github.com/confident-ai/deepeval/pull/3272): `HumanEval`'s reported
+  accuracy treated each task's pass@k estimate as a pass/fail flag, so two tasks scoring
+  0.3 and 0.4 pass@1 printed "Overall HumanEval Accuracy: 1.0" instead of the mean, 0.35.
+  [#3273](https://github.com/confident-ai/deepeval/pull/3273): `IFEval`'s
+  lowercase/uppercase checker failed a response with no letters at all — `"42"` — because
+  `str.islower()` requires a cased character to return `True`, a stricter condition than
+  the instruction it was checking. Each ships a regression test verified to fail without
+  the fix.
+- [`comet-ml/opik`](https://github.com/comet-ml/opik/pull/8276) — `SpearmanRanking`
+  checked that two rankings had the same length and the same *set* of items, but not that
+  each was a permutation. A duplicate that kept both sets equal slipped through, and the
+  rank lookup silently kept only the last occurrence's index — returning a numeric
+  correlation for an input whose ranks were never well-defined, instead of raising. Filed
+  as issue #8275 with the reproduction, per the repo's own contribution process; PR open.
 **Reported**
 
 Defects found by reading the code, filed with a standalone reproduction rather than a
@@ -548,8 +571,10 @@ across Ruby tooling and a mailer gem — the last five shipped in `courrier` 1.1
 **Open** — the same audit, scripted across every component:
 [#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873) and a sync/async
 batching parity fix ([#3926](https://github.com/deepset-ai/haystack-core-integrations/pull/3926)).
-Plus [five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
-on retrieval metrics, MMR and evaluation, and open fixes across Ruby tooling and a Rails app.
+Plus [five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333),
+four in [`deepeval`](https://github.com/confident-ai/deepeval/pulls?q=is%3Apr+author%3Apcbeingused333)
+and one in [`opik`](https://github.com/comet-ml/opik/pull/8276) — all metric/scoring
+correctness bugs — plus open fixes across Ruby tooling and a Rails app.
 Defects I only reported, each with a standalone reproduction, are triaged and taken up the
 same way: [`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) —
 `LLMJudge` grading a `bytes` output rendered as one decimal byte per line, no error — is
