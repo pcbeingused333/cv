@@ -22,22 +22,22 @@ found defects the tests did not. That measurement layer is now a published libra
 [`ragcite`](https://github.com/pcbeingused333/ragcite), which asserts that it reproduces the
 numbers of the project it was extracted from. Fullstack background across Python, TypeScript
 and Ruby, with production experience shipping and operating what I build. I also fix the
-frameworks this work runs on — **twenty-two merged pull requests** this year. Seven are in
+frameworks this work runs on — **thirty-one merged pull requests** this year. Twelve are in
 **Haystack** and its integrations, deepset's framework for production RAG and agent
-pipelines: four concurrency defects on the async path, three serialization defects that
-changed how a component behaved after a reload. Six more are in **LangChain.rb**. Plus a
+pipelines: concurrency and async/sync-parity defects, plus components that dropped a setting
+from `to_dict` so it silently reverted on reload. Six more are in **LangChain.rb**. Plus a
 fix to `pydantic-ai`'s eval framework, two in `pyfenn/fenn`, and open fixes to the
 retrieval-evaluation and MMR code in `llama-index-core`.
 <!--/long-->
 <!--short:
 Applied AI engineer in Python: two retrieval and agent systems in production, each shipping
-the harness that measures it, and **twenty-two merged pull requests** this year into the
+the harness that measures it, and **thirty-one merged pull requests** this year into the
 frameworks they run on. My main project answers over the text of the **GDPR** under a
 constraint generic RAG ignores — every statement names the provision it came from, and the
 system declines when the source does not cover the question. In both projects the harness
-found defects the tests did not. Fullstack across Python, TypeScript and Ruby; seven of those
-merged fixes are in **Haystack** and its integrations (deepset's RAG and agent framework),
-four of them concurrency defects on the async path, and six in **LangChain.rb**.
+found defects the tests did not. Fullstack across Python, TypeScript and Ruby; twelve of
+those merged fixes are in **Haystack** and its integrations (deepset's RAG and agent
+framework), concurrency and async/sync-parity defects, and six in **LangChain.rb**.
 -->
 
 ---
@@ -402,6 +402,35 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   trip; a TEI ranker that stops asking the endpoint for raw scores; and a Ragas evaluator
   falling from 16 concurrent LLM judgements back to 4. Found by auditing `to_dict` against
   `__init__` across the integrations, not from an issue.
+- [`deepset-ai/haystack-core-integrations` #3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873) —
+  the same defect as #3808, found again by scripting the audit as an AST pass comparing every
+  component's `__init__` parameters against the keys that reach `to_dict`. Two more settings
+  dropped: the botocore config behind an S3 downloader's timeouts and retries, and the
+  threshold deciding which overlapping answers an extractive reader discards. A sibling
+  component already serialized the parameter in each case, and the existing tests showed the
+  omission was an oversight — one was parametrized over a value that could not change its own
+  assertion. The audit's first version also flagged `google_vertex`; a maintainer pointed out
+  on my issue #3874 that the integration is archived, so I dropped that commit.
+- [`deepset-ai/haystack-core-integrations` #3926](https://github.com/deepset-ai/haystack-core-integrations/pull/3926) —
+  sync/async parity, the same class as the concurrency fixes above: `CohereDocumentEmbedder`'s
+  sync path batches `texts` in slices of `batch_size` before calling the embed endpoint, and
+  `run_async` sent them all in one call — so on more documents than the endpoint's per-call
+  cap, the async path failed where the sync path worked.
+- [`deepset-ai/haystack` #12662](https://github.com/deepset-ai/haystack/pull/12662),
+  [#12663](https://github.com/deepset-ai/haystack/pull/12663),
+  [#12664](https://github.com/deepset-ai/haystack/pull/12664) — three more async/sync-parity
+  defects, found the same way: reading the sync and async implementations side by side.
+  `MultiQueryEmbeddingRetriever.run_async` ignored `max_workers` entirely — the sync path
+  bounds its fan-out with a `ThreadPoolExecutor`, but `run_async` awaited every task at once,
+  so 50 expanded queries meant 50 concurrent embedding calls regardless of the configured
+  limit; fixed with the semaphore pattern the codebase already uses elsewhere.
+  `OpenAIDocumentEmbedder.run_async` was missing `encoding_format="float"`, added to the sync
+  path by an earlier PR that never touched the async one, so endpoints rejecting the default
+  `base64` wire format still broke on the async path. And `Pipeline._run_component_async`
+  caught every exception with a bare `except Exception`, where the sync path re-raises a
+  `BreakpointException` or a `PipelineRuntimeError` unchanged so a nested pipeline's error
+  survives the trip up — the async path wrapped both in a second `PipelineRuntimeError`,
+  burying the original context. Each ships a regression test that fails on `main`.
 - [`pydantic/pydantic-ai` #7936](https://github.com/pydantic/pydantic-ai/pull/7936) —
   `pydantic-evals` reads `expected_output=None` as "no expectation", so a `Case` written to
   assert that a task returns `None` is skipped instead: `EqualsExpected` records no
@@ -428,8 +457,11 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   walked `:block` AST ancestors only, so an example group written as an `itblock` or
   `numblock` was never found and the lookup returned `nil`. Widened to `:any_block`,
   with a regression spec pinned to Ruby 3.4.
+- [`rubocop/rubocop-rspec` #2214](https://github.com/rubocop/rubocop-rspec/pull/2214) —
+  fixed `RSpec/LeadingSubject` autocorrecting a subject to a position above another
+  subject.
 - [`Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) —
-  five merged in a Ruby mailer gem, all shipped in its 1.1.0 release: MailerSend, Mailtrap
+  six merged in a Ruby mailer gem. Five shipped in its 1.1.0 release: MailerSend, Mailtrap
   and SMTP.com provider integrations, which closed the gem's standing request for more
   providers; a `NameError` that broke Mailgun and Mailjet on Ruby 3.4 — `Base64` left the
   default gems and those two were the only providers calling it without requiring it, so the
@@ -439,7 +471,26 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   wants, which for SparkPost is not a field at all — every copy is a recipient there, and
   what separates a cc from a bcc is whether the address repeats in the CC header. Reading the
   lists through one helper also fixes Mailjet, SendGrid and SparkPost sending several `to:`
-  addresses as a single malformed one — filed as #59.
+  addresses as a single malformed one — filed as #59. The sixth, merged after that release,
+  fixes the same class of defect one more time: `with_name` quotes a display name that
+  contains a comma, but the shared `address_list` helper split every recipient string on
+  commas including the one inside that quoted name, tearing a single address in two; three
+  providers that still hand-rolled their own parsing instead of using the helper
+  (Smtp2go, Lettermint, SES) had the identical break outside it entirely.
+- [`Arize-ai/phoenix`](https://github.com/Arize-ai/phoenix/pull/16002) — AI observability and
+  evals platform. `MessageTemplate.__init__` converted a message role with `MessageRole(role)`
+  directly instead of the module's own `normalize_role` helper, so the documented OpenAI-style
+  message-list `PromptTemplate` rejected role spellings the rest of the codebase already
+  accepts — `developer` (OpenAI's current system-role name), `human` / `ai` / `model`
+  (LangChain's and Google's). A non-string role also fell through both branches without
+  raising, surfacing later as an unrelated `AttributeError` instead of a clean error at
+  construction. Routed through `normalize_role`, net seven lines shorter.
+- [`comet-ml/opik`](https://github.com/comet-ml/opik/pull/8276) — `SpearmanRanking` checked
+  that two rankings had the same length and the same *set* of items, but not that each was a
+  permutation. A duplicate that kept both sets equal slipped through, and the rank lookup
+  silently kept only the last occurrence's index — returning a numeric correlation for an
+  input whose ranks were never well-defined, instead of raising. Filed as issue #8275 with
+  the reproduction, per the repo's own contribution process; merged.
 
 Each Haystack fix ships a regression test I verified fails with the fix reverted, rather
 than passing either way. I wrote the four concurrency ones up together, because they are
@@ -448,20 +499,6 @@ one class of defect and three were invisible to the test suite for the same reas
 
 **Open**
 
-- [`deepset-ai/haystack-core-integrations` #3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873) —
-  the same defect as #3808, found again by scripting the audit as an AST pass comparing every
-  component's `__init__` parameters against the keys that reach `to_dict`. Two more settings
-  dropped: the botocore config behind an S3 downloader's timeouts and retries, and the
-  threshold deciding which overlapping answers an extractive reader discards. A sibling
-  component already serialized the parameter in each case, and the existing tests showed the
-  omission was an oversight — one was parametrized over a value that could not change its own
-  assertion. The audit's first version also flagged `google_vertex`; a maintainer pointed out
-  on my issue #3874 that the integration is archived, so I dropped that commit.
-- [`deepset-ai/haystack-core-integrations` #3926](https://github.com/deepset-ai/haystack-core-integrations/pull/3926) —
-  sync/async parity, the same class as the concurrency fixes above: `CohereDocumentEmbedder`'s
-  sync path batches `texts` in slices of `batch_size` before calling the embed endpoint, and
-  `run_async` sent them all in one call — so on more documents than the endpoint's per-call
-  cap, the async path fails where the sync path works.
 - [`run-llama/llama_index`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333) —
   five fixes in `llama-index-core`, found by reading the retrieval and evaluation code
   rather than from an issue. [#22683](https://github.com/run-llama/llama_index/pull/22683):
@@ -489,9 +526,6 @@ one class of defect and three were invisible to the test suite for the same reas
   signature went out on the second call too. Scoped the fallback to the case it exists for —
   no call carries a signature of its own — so a turn where Gemini signed every call now
   replays exactly as it arrived.
-- [`rubocop/rubocop-rspec` #2214](https://github.com/rubocop/rubocop-rspec/pull/2214) —
-  fixed `RSpec/LeadingSubject` autocorrecting a subject to a position above another
-  subject.
 - [`rubocop/rubocop-performance` #529](https://github.com/rubocop/rubocop-performance/pull/529) —
   fixed `Performance/ConstantRegexp` emitting invalid code when autocorrecting a regexp
   used as a pattern in `case`/`in` pattern matching.
@@ -522,12 +556,7 @@ one class of defect and three were invisible to the test suite for the same reas
   `str.islower()` requires a cased character to return `True`, a stricter condition than
   the instruction it was checking. Each ships a regression test verified to fail without
   the fix.
-- [`comet-ml/opik`](https://github.com/comet-ml/opik/pull/8276) — `SpearmanRanking`
-  checked that two rankings had the same length and the same *set* of items, but not that
-  each was a permutation. A duplicate that kept both sets equal slipped through, and the
-  rank lookup silently kept only the last occurrence's index — returning a numeric
-  correlation for an input whose ranks were never well-defined, instead of raising. Filed
-  as issue #8275 with the reproduction, per the repo's own contribution process; PR open.
+
 **Reported**
 
 Defects found by reading the code, filed with a standalone reproduction rather than a
@@ -565,29 +594,26 @@ bug report someone else has to reproduce first.
   by #286 above.
 <!--/long-->
 <!--short:
-**Merged — twenty-two pull requests this year.** Seven across
+**Merged — thirty-one pull requests this year.** Twelve across
 [`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333)
-and its integrations, each with a regression test I verified fails with the fix reverted.
-Four are one class of concurrency defect on the async path, three of them invisible to the
-test suite for the same reason, written up together:
-[Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
-The other three are serialization defects — a component dropping an `__init__` parameter
-from `to_dict`, so the setting silently reverted to its default whenever a pipeline was
-saved and reloaded, found by an AST audit of `__init__` against `to_dict`
+and its integrations, each with a regression test I verified fails with the fix reverted —
+concurrency defects on the async path (four of them invisible to the test suite for the same
+reason, written up together:
+[Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency)),
+async/sync-parity gaps, and components dropping an `__init__` parameter from `to_dict` so the
+setting silently reverted on reload, found by an AST audit of `__init__` against `to_dict`
 ([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Also merged:
 [six in `LangChain.rb`](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged),
 edge cases that crashed a caller instead of degrading; a documentation fix in
 [`pydantic-ai`](https://github.com/pydantic/pydantic-ai/pull/7936) for an eval case that
-could not fail; two in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277); and six
-across Ruby tooling and a mailer gem — the last five shipped in `courrier` 1.1.0.
+could not fail; two in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277); eight across
+Ruby tooling and a mailer gem — five shipped in `courrier` 1.1.0, one since; a
+ranking-validity fix in [`opik`](https://github.com/comet-ml/opik/pull/8276); and a
+role-alias fix in [`Arize-ai/phoenix`](https://github.com/Arize-ai/phoenix/pull/16002).
 
-**Open** — the same audit, scripted across every component:
-[#3873](https://github.com/deepset-ai/haystack-core-integrations/pull/3873) and a sync/async
-batching parity fix ([#3926](https://github.com/deepset-ai/haystack-core-integrations/pull/3926)).
-Plus [five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333),
-four in [`deepeval`](https://github.com/confident-ai/deepeval/pulls?q=is%3Apr+author%3Apcbeingused333)
-and one in [`opik`](https://github.com/comet-ml/opik/pull/8276) — all metric/scoring
-correctness bugs — plus open fixes across Ruby tooling and a Rails app.
+**Open** — [five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
+and [four in `deepeval`](https://github.com/confident-ai/deepeval/pulls?q=is%3Apr+author%3Apcbeingused333) —
+metric/scoring correctness bugs — plus open fixes across Ruby tooling and a Rails app.
 Defects I only reported, each with a standalone reproduction, are triaged and taken up the
 same way: [`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) —
 `LLMJudge` grading a `bytes` output rendered as one decimal byte per line, no error — is
