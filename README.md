@@ -482,6 +482,13 @@ one class of defect and three were invisible to the test suite for the same reas
   `CohereRerankRelevancyMetric` guarded a missing API-key variable with `except IndexError`,
   but a missing environment variable raises `KeyError`, so the intended "pass in an API key"
   error never replaced the bare traceback. Each ships with a test that fails without the fix.
+- [`crmne/ruby_llm` #1019](https://github.com/crmne/ruby_llm/pull/1019) — when Gemini returns
+  several function calls in parallel, only the first carries a `thoughtSignature`. The
+  provider's one fallback for replaying a signature that arrived outside the calls (#521)
+  did not check whether a later call already had its own, so on replay the first call's
+  signature went out on the second call too. Scoped the fallback to the case it exists for —
+  no call carries a signature of its own — so a turn where Gemini signed every call now
+  replays exactly as it arrived.
 - [`rubocop/rubocop-rspec` #2214](https://github.com/rubocop/rubocop-rspec/pull/2214) —
   fixed `RSpec/LeadingSubject` autocorrecting a subject to a position above another
   subject.
@@ -540,6 +547,12 @@ bug report someone else has to reproduce first.
   recommends for comparing implementations and validating changes before deployment —
   exposes only the number. A judge exhausting its quota mid-run therefore reports a *higher*
   score than the run earned, and a threshold check passes. Routed to maintainer discussion.
+- [`crmne/ruby_llm` #1016](https://github.com/crmne/ruby_llm/issues/1016) — Claude Sonnet 5.5
+  dropped `thinking: {type: "disabled"}` for `between_tools`, and the model registry has no
+  field for a model to declare which value turns thinking off, so `with_thinking(false)`
+  raises an `ArgumentError` instead of sending the right payload. Reproduced against the
+  model's migration guide and traced to the registry gap; proposed two fixes — a registry
+  schema change upstream, or a provider-local off control — for the maintainer to pick.
 - [`deepset-ai/haystack` #12519](https://github.com/deepset-ai/haystack/issues/12519) — `main`
   was failing on every pull request because an `openai` release added three fields to its
   usage models and two tests assert an exact usage dict. Bisected to the version, filed with
