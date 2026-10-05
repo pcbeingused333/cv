@@ -4,6 +4,7 @@ Render README.md — which is the CV — to a PDF you can attach to an applicati
     pip install weasyprint markdown
     python build_pdf.py            # full version, ~4 pages
     python build_pdf.py --short    # 2-page version for applications
+    python build_pdf.py --swe      # 2-page version for non-AI software roles
 
 Two lengths, one source
 -----------------------
@@ -24,8 +25,21 @@ attached to an application: two pages is the convention, and four pages of prose
 someone whose formal employment is measured in months reads as an editing problem before
 anyone has judged the engineering.
 
-Writes Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf (or ..._2-page.pdf) next to
-this file.
+Two angles, same source
+-----------------------
+The README is written for Applied AI roles. For general software roles (backend, full
+stack) the same facts need a different title, summary and skills order, so those three
+passages carry a second variant:
+
+    <!--ai-->  ...the Applied AI version, the one GitHub shows...  <!--/ai-->
+
+    <!--swe:  ...the generalist rewrite...  -->
+
+`--swe` swaps them in and builds the two-page length. Everything else (experience,
+projects, open source) is shared, so the two CVs cannot disagree on a fact.
+
+Writes Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf (or ..._2-page.pdf, or
+Alex_Castillo_Gonzalez_Software_Engineer_2-page.pdf) next to this file.
 
 The Markdown stays the single source of truth. A PDF kept as its own document drifts
 from the README within two edits, and the README is what a recruiter sees first when
@@ -52,13 +66,25 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 SOURCE = os.path.join(HERE, "README.md")
 OUTPUT_LONG = os.path.join(HERE, "Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf")
 OUTPUT_SHORT = os.path.join(HERE, "Alex_Castillo_Gonzalez_Applied_AI_Engineer_2-page.pdf")
+OUTPUT_SWE = os.path.join(HERE, "Alex_Castillo_Gonzalez_Software_Engineer_2-page.pdf")
 
 LONG_BLOCK = re.compile(r"[ \t]*<!--long-->[ \t]*\n(.*?)\n?[ \t]*<!--/long-->[ \t]*\n?", re.S)
 SHORT_BLOCK = re.compile(r"[ \t]*<!--short:[ \t]*\n(.*?)\n?[ \t]*-->[ \t]*\n?", re.S)
+AI_BLOCK = re.compile(r"[ \t]*<!--ai-->[ \t]*\n(.*?)\n?[ \t]*<!--/ai-->[ \t]*\n?", re.S)
+SWE_BLOCK = re.compile(r"[ \t]*<!--swe:[ \t]*\n(.*?)\n?[ \t]*-->[ \t]*\n?", re.S)
 
 
-def select_variant(text: str, short: bool) -> str:
-    """Resolve the long/short markers down to one version of the document."""
+def select_variant(text: str, short: bool, swe: bool = False) -> str:
+    """Resolve the ai/swe, then the long/short markers down to one version."""
+    # ai/swe first: an <!--ai--> block wraps whole long/short pairs, so it has to be
+    # resolved before those are.
+    if swe:
+        text = AI_BLOCK.sub("", text)
+        text = SWE_BLOCK.sub(lambda m: m.group(1) + "\n", text)
+    else:
+        text = AI_BLOCK.sub(lambda m: m.group(1) + "\n", text)
+        text = SWE_BLOCK.sub("", text)
+
     if short:
         text = LONG_BLOCK.sub("", text)
         text = SHORT_BLOCK.sub(lambda m: m.group(1) + "\n", text)
@@ -203,16 +229,18 @@ hr { margin: 1.6mm 0 0; }
 """
 
 
-def build(short: bool = False) -> None:
+def build(short: bool = False, swe: bool = False) -> None:
+    short = short or swe  # the generalist CV only exists at application length
     with open(SOURCE, encoding="utf-8") as handle:
-        text = select_variant(handle.read(), short)
+        text = select_variant(handle.read(), short, swe)
 
     body = markdown.markdown(text, extensions=["extra", "sane_lists"])
     document = f"<!doctype html><html><head><meta charset='utf-8'>" \
-               f"<title>Alex Castillo González — Applied AI Engineer</title></head>" \
+               f"<title>Alex Castillo González — " \
+               f"{'Software Engineer' if swe else 'Applied AI Engineer'}</title></head>" \
                f"<body>{body}</body></html>"
 
-    output = OUTPUT_SHORT if short else OUTPUT_LONG
+    output = OUTPUT_SWE if swe else OUTPUT_SHORT if short else OUTPUT_LONG
     sheets = [CSS(string=STYLESHEET)]
     if short:
         sheets.append(CSS(string=SHORT_TIGHTENING))
@@ -230,4 +258,4 @@ def build(short: bool = False) -> None:
 if __name__ == "__main__":
     import sys
 
-    build(short="--short" in sys.argv)
+    build(short="--short" in sys.argv, swe="--swe" in sys.argv)

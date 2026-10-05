@@ -1,6 +1,11 @@
 # Alex Castillo González
 
+<!--ai-->
 **Applied AI Engineer · Python / LLM**
+<!--/ai-->
+<!--swe:
+**Software Engineer · Python / TypeScript / Ruby**
+-->
 
 Santo Domingo, Dominican Republic — UTC−4 · Independent contractor (Spanish passport) · Spanish (native), English (professional)
 [alex.castillog33@gmail.com](mailto:alex.castillog33@gmail.com) · [github.com/pcbeingused333](https://github.com/pcbeingused333) · [linkedin.com/in/alexcastillogonzalez](https://www.linkedin.com/in/alexcastillogonzalez) · [portfolio-alexgonzalez33.vercel.app](https://portfolio-alexgonzalez33.vercel.app)
@@ -9,6 +14,7 @@ Santo Domingo, Dominican Republic — UTC−4 · Independent contractor (Spanish
 
 ## Summary
 
+<!--ai-->
 <!--long-->
 Applied AI engineer working in Python on retrieval and agent systems, and on the layer
 that decides whether they survive real users: evaluation, failure handling, and knowing
@@ -39,11 +45,24 @@ found defects the tests did not. Fullstack across Python, TypeScript and Ruby; t
 those merged fixes are in **Haystack** and its integrations (deepset's RAG and agent
 framework), concurrency and async/sync-parity defects, and six in **LangChain.rb**.
 -->
+<!--/ai-->
+<!--swe:
+Software engineer working across Python, TypeScript and Ruby, with **thirty-one merged
+pull requests** this year into open-source projects other teams build on: twelve in
+**Haystack** and its integrations (deepset's RAG and agent framework), six in
+**LangChain.rb**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`) and Python
+libraries (`pydantic-ai`, `opik`, `phoenix`) — concurrency, serialization and
+error-handling defects. I build and deploy end to end: Python services with their own test
+suites, Next.js front ends, AWS infrastructure in Terraform with CI/CD on GitHub Actions.
+Earlier, fullstack Rails at TECNOBIT and teaching Ruby and SQL at Le Wagon. Before moving
+to the Dominican Republic I founded and ran a business on my own in Toronto.
+-->
 
 ---
 
 ## Skills
 
+<!--ai-->
 <!--long-->
 **AI / LLM** — Python · LLM APIs (Groq, OpenAI-compatible) · LangChain · LangGraph ·
 ReAct agents and tool use · **Model Context Protocol (MCP)**: building servers and
@@ -96,37 +115,47 @@ integrations (Jira API) · TypeScript · Next.js · React · Tailwind
 least-privilege, CloudWatch) · **Terraform** · **CI/CD with GitHub Actions, OIDC
 federation** · Docker · Vercel · Git · AI-assisted development (Claude Code, Cursor)
 -->
+<!--/ai-->
+<!--swe:
+**Backend** — Python · pytest · Ruby on Rails · PostgreSQL · REST APIs · JSON/API
+integrations (Jira API)
+
+**Web** — TypeScript · Next.js · React · Tailwind · JavaScript · HTML/CSS
+
+**Infra & tooling** — **AWS** (Lambda container images, DynamoDB, ECR, IAM
+least-privilege, CloudWatch) · **Terraform** · **CI/CD with GitHub Actions, OIDC
+federation** · Docker · Vercel · Git (GitHub, GitLab) · AI-assisted development (Claude
+Code, Cursor)
+
+**AI / LLM** — LLM APIs · LangChain · LangGraph · agents and tool use · **Model Context
+Protocol (MCP)** servers and clients · RAG with embeddings, FAISS and `pgvector` · LLM
+evaluation
+-->
 
 ---
 
 ## Experience
 
-### Churrería Calderón — Family business · Toronto, Canada
-**Oct 2025 – Jul 2026** *(business closed July 2026)*
+### Churrería Calderón — Founder & owner-operator · Toronto, Canada
+**Sep 2025 – Jul 2026** *(business closed July 2026)*
 
 <!--long-->
-- **Developer:** built and deployed the business website, plus an embeddable AI chat
-  widget that answered customer questions on menu, hours, location and FAQs, grounded
-  only in the business's own information so it would not invent details. Built the
-  widget to be reusable across clients from a single configuration file. Next.js,
-  React, TypeScript, Tailwind, Groq, Vercel.
-- Shipped both during the setup period before the December 2025 opening, so the site
-  and the assistant were live on day one rather than added later.
-- Worked in day-to-day operations of the business throughout, which is where the
-  judgement about which problems are worth automating — and which are not — came from.
+- Moved my churro business from Spain to Toronto on my own: signed a lease in Kensington
+  Market, imported the production machinery, registered the business and obtained every
+  permit needed to operate legally.
+- Fitted out the store from my arrival in September 2025 and opened on 16 December, then
+  ran it with no hires — production, service, customers, purchasing, cash and
+  compliance — until it closed in July 2026.
 <!--/long-->
 <!--short:
-- **Developer:** built and deployed the business website plus an embeddable AI chat
-  widget answering customer questions grounded only in the business's own information,
-  reusable across clients from a single configuration file. Next.js, React, TypeScript,
-  Tailwind, Groq, Vercel.
-- Shipped both before the December 2025 opening, so the site and the assistant were live
-  on day one — while also running day-to-day operations, which is where the judgement
-  about what is worth automating came from.
+- Moved my business from Spain to Toronto on my own: leased premises in Kensington Market,
+  imported the machinery, registered the business and obtained every permit to operate
+  legally. Opened in December 2025 and ran it with no hires — production, service,
+  purchasing, cash and compliance — until it closed in July 2026.
 -->
 
 ### Family churrería business — Owner-operator · Catalonia, Spain
-**2023 – 2026** *(and in the same business before that)*
+**2023 – 2025** *(and in the same business before that)*
 
 <!--long-->
 - Ran the business single-handed: production, service, customers, purchasing, cash
@@ -556,6 +585,108 @@ one class of defect and three were invisible to the test suite for the same reas
   `str.islower()` requires a cased character to return `True`, a stricter condition than
   the instruction it was checking. Each ships a regression test verified to fail without
   the fix.
+- [`567-labs/instructor`](https://github.com/567-labs/instructor/pull/2664) — structured
+  outputs for LLMs, 14k stars. Four streaming extractors (Mistral, Gemini, GenAI, VertexAI)
+  indexed `choices[0]` / `candidates[0]` unconditionally inside a `try/except AttributeError`
+  written to skip malformed chunks gracefully — but an empty list raises `IndexError`, not
+  `AttributeError`, so a legitimate empty chunk (Mistral's trailing usage-only chunk, a
+  safety-blocked Gemini candidate) killed the whole structured-output stream instead of being
+  skipped. Two other handlers in the same codebase already guarded against exactly this;
+  widened the four to match.
+- [`vibrantlabsai/ragas`](https://github.com/vibrantlabsai/ragas/pulls?q=is%3Apr+author%3Apcbeingused333) —
+  LLM evaluation framework, 16k stars. Two fixes, found by reading the code rather than from
+  an issue.
+  [#3017](https://github.com/vibrantlabsai/ragas/pull/3017): `ragas/llms/base.py` imports
+  `ChatVertexAI` from a `langchain_community` submodule that's been removed upstream — Vertex
+  AI support moved to a separate package — so a fresh install of any current
+  `langchain-community` broke `import ragas` outright, before any application code ran.
+  Guarded the import the way the codebase already handles its other optional integrations.
+  [#3018](https://github.com/vibrantlabsai/ragas/pull/3018): `SummarizationScore`'s QA
+  sub-score divides by the number of generated answers; when the judge model returns zero
+  questions — already a handled case elsewhere in the same file — that denominator is zero.
+  The newer v2 implementation documents the bug in a code comment instead of fixing it.
+  Returns `0.0` for the empty case, matching the degrade-not-raise convention the rest of the
+  file already follows.
+- [`Giskard-AI/giskard-oss` #2830](https://github.com/Giskard-AI/giskard-oss/pull/2830) — LLM
+  agent evaluation and testing, 6k stars. `AnthropicChatTranslator` only recognized `text` and
+  `tool_use` content blocks and raised on anything else; Claude's actual content-block union
+  has eleven members, including `thinking` / `redacted_thinking` for extended thinking. Any
+  judge or check run with extended thinking enabled crashed the entire translation, losing the
+  response's text and tool calls with it. Dropped unknown blocks with a debug log instead,
+  matching how the same file already degrades gracefully for unknown completion params a few
+  lines above. A maintainer flagged that silently dropping thinking blocks isn't ideal
+  long-term; working out the right representation for it with them now.
+- [`guardrails-ai/guardrails` #1653](https://github.com/guardrails-ai/guardrails/pull/1653) —
+  output validation for LLMs, 7k stars. The three-way text merge that reconciles two
+  validators' independently-fixed versions of the same streamed value indexes into a diff
+  result assuming it always has two elements; one branch can reach that index with a
+  one-element diff once a preserved chunk has already been sliced down to an empty string,
+  raising `IndexError`. The mirrored branch a few lines below already had the guard this one
+  was missing. Found by fuzzing the merge function with random edits of a shared base string.
+- [`Arize-ai/openinference` #3795](https://github.com/Arize-ai/openinference/pull/3795) —
+  OpenTelemetry instrumentation for AI observability, 1.2k stars. The Mistral
+  instrumentation's async stream accumulator indexed `choices[0]` unconditionally to peek at
+  `finish_reason`; an empty `choices` list — the same shape OpenAI-compatible APIs use for a
+  trailing usage-only chunk — raised `IndexError` from inside the generator, killing the LLM
+  response the instrumentation exists to observe transparently, which the package's own
+  contributing guide states instrumentation must never do. Every other `choices` access in
+  the same package already guards against this.
+- [`Rails-Designer/perron`](https://github.com/Rails-Designer/perron/pulls?q=is%3Apr+author%3Apcbeingused333) —
+  static site generator for Rails. Five fixes, all crashes on configuration or content a real
+  site can produce.
+  [#213](https://github.com/Rails-Designer/perron/pull/213): an omitted `base_path` — a
+  documented optional keyword — breaks pagination links once a collection has more than one
+  page, and an unset `per_page` reaches `clamp` as `nil` or zero, producing a
+  `TypeError`/`FloatDomainError` instead of a clear error.
+  [#214](https://github.com/Rails-Designer/perron/pull/214): `Relation#order` sorts with
+  `sort_by`, so one resource with a `nil` value for the ordering attribute — an optional
+  frontmatter date or position — crashes the whole query; a sibling method already guarded
+  for this.
+  [#215](https://github.com/Rails-Designer/perron/pull/215): a post whose body opens with a
+  `---` thematic break and contains a second `---` gets misread as frontmatter, and
+  `YAML.safe_load` on real prose returns a `String`, not a `Hash`, so iterating it as
+  frontmatter raises.
+  [#216](https://github.com/Rails-Designer/perron/pull/216): a typo'd date in a filename
+  (`2024-99-99-post.md`) matches the date regex structurally and reaches `Date.new`, which
+  raises and takes down the whole collection load.
+  [#217](https://github.com/Rails-Designer/perron/pull/217): joining a base URL with a
+  relative path that has no leading slash drops the separator entirely
+  (`https://example.comcover.jpg`), breaking `og:image` and feed image rewrites for the
+  common case of a bare filename in frontmatter.
+- [`Rails-Designer/icons`](https://github.com/Rails-Designer/icons/pulls?q=is%3Apr+author%3Apcbeingused333) —
+  add any icon library to a Ruby app.
+  [#19](https://github.com/Rails-Designer/icons/pull/19): an icon file that isn't valid SVG
+  (empty, truncated, or an HTML error page from a bad sync) reaches `at_css("svg")`, which
+  returns `nil`, and the sprite builder crashes with `NoMethodError` instead of skipping the
+  file the way an already-missing icon is handled.
+  [#20](https://github.com/Rails-Designer/icons/pull/20): a sync failure's own cleanup prompt
+  reads from stdin unconditionally; run non-interactively (CI, cron), `$stdin.gets` returns
+  `nil` and the cleanup code itself raises `NoMethodError` — which, because it runs inside the
+  `rescue` for the real failure, replaces and hides the actual sync error instead of letting
+  it propagate.
+- [`Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333) —
+  five more open in the same mailer gem as above.
+  [#64](https://github.com/Rails-Designer/courrier/pull/64): a response with a `nil` body (a
+  204 from a subscriber delete, or any provider returning an empty success payload) reaches
+  `JSON.parse(nil)` and raises `TypeError` on a request that actually succeeded; now returns
+  `{}` before parsing, same as the existing `JSON::ParserError` fallback.
+  [#65](https://github.com/Rails-Designer/courrier/pull/65): setting a layout for only one of
+  `html`/`text` — the normal case in every example in the README — crashes in the
+  constructor, because mapping both formats through `to_h` yields `nil` for the missing one
+  and `to_h` requires a 2-element array from every block result.
+  [#66](https://github.com/Rails-Designer/courrier/pull/66): four subscriber providers build
+  request URLs from the raw email address; three don't URL-encode it, so a `+tag` Gmail
+  address is mangled into the wrong path or query, and Mailchimp addresses a member by the
+  MD5 hash of the lowercased email rather than the raw string, so delete/lookup calls 404
+  silently.
+  [#67](https://github.com/Rails-Designer/courrier/pull/67): wrapping the email body in a
+  layout via `String#%` treats every bare `%` in the layout as a format directive, so
+  `width: 100%` or `line-height: 150%` in an ordinary HTML email layout raises `ArgumentError`
+  before the email sends.
+  [#68](https://github.com/Rails-Designer/courrier/pull/68): `Address.with_name`'s quoting
+  escaped `"` but not `\`, so a display name containing a backslash produced a `quoted-pair`
+  RFC 5322 requires but never emits, corrupting the header — a trailing backslash even
+  escapes the closing quote and runs the quoted string into the address itself.
 
 **Reported**
 
@@ -613,7 +744,8 @@ role-alias fix in [`Arize-ai/phoenix`](https://github.com/Arize-ai/phoenix/pull/
 
 **Open** — [five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
 and [four in `deepeval`](https://github.com/confident-ai/deepeval/pulls?q=is%3Apr+author%3Apcbeingused333) —
-metric/scoring correctness bugs — plus open fixes across Ruby tooling and a Rails app.
+metric/scoring correctness bugs — plus open fixes in `ragas`, `giskard` and `guardrails`,
+and across Ruby tooling and two Rails apps.
 Defects I only reported, each with a standalone reproduction, are triaged and taken up the
 same way: [`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) —
 `LLMJudge` grading a `bytes` output rendered as one decimal byte per line, no error — is

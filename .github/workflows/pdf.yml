@@ -43,23 +43,26 @@ jobs:
 
       - run: pip install weasyprint markdown
 
-      - name: Build both versions
+      - name: Build all versions
         run: |
           python build_pdf.py
           python build_pdf.py --short
+          python build_pdf.py --swe
 
       # build_pdf.py prints a warning when the short version overruns two pages, but a
       # warning in a log nobody reads is not a check. This fails the run instead.
-      - name: The short version must actually be two pages
+      - name: The short versions must actually be two pages
         run: |
           pip install pypdf
           python - <<'PY'
           import sys
           from pypdf import PdfReader
-          pages = len(PdfReader("Alex_Castillo_Gonzalez_Applied_AI_Engineer_2-page.pdf").pages)
-          print(f"short version: {pages} pages")
-          if pages != 2:
-              sys.exit(f"expected 2 pages, got {pages} — trim README.md")
+          for path in ("Alex_Castillo_Gonzalez_Applied_AI_Engineer_2-page.pdf",
+                       "Alex_Castillo_Gonzalez_Software_Engineer_2-page.pdf"):
+              pages = len(PdfReader(path).pages)
+              print(f"{path}: {pages} pages")
+              if pages != 2:
+                  sys.exit(f"expected 2 pages, got {pages} — trim README.md")
           PY
 
       # The renderer kerns pairs like "Ty" and "Ta" with a positioning offset that text
@@ -77,7 +80,8 @@ jobs:
                    "Alex Castillo González"]
           failed = False
           for path in ("Alex_Castillo_Gonzalez_Applied_AI_Engineer.pdf",
-                       "Alex_Castillo_Gonzalez_Applied_AI_Engineer_2-page.pdf"):
+                       "Alex_Castillo_Gonzalez_Applied_AI_Engineer_2-page.pdf",
+                       "Alex_Castillo_Gonzalez_Software_Engineer_2-page.pdf"):
               text = " ".join(p.extract_text() for p in PdfReader(path).pages)
               missing = [t for t in TERMS if t not in text]
               print(f"{path}: {'ok' if not missing else 'MISSING ' + ', '.join(missing)}")
