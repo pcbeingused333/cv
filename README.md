@@ -154,13 +154,12 @@ evaluation
   purchasing, cash and compliance — until it closed in July 2026.
 -->
 
-### Family churrería business — Owner-operator · Catalonia, Spain
-**2023 – 2025** *(and in the same business before that)*
+### Family churrería business — Manager · Catalonia, Spain
+**2023 – Aug 2025** · mainly summer seasons *(and in the same business before that)*
 
 <!--long-->
-- Ran the business single-handed: production, service, customers, purchasing, cash
-  and compliance. No staff to delegate to and no manager to escalate to — if it did
-  not work, it was mine to fix that morning.
+- Managed the family business, mainly through the summer seasons: production, service,
+  customers, purchasing and cash.
 - Took it from a mobile trailer to fixed premises, which meant rebuilding the
   operation around a different site, different hours and a different customer base.
 - Also worked my father's stand on the fairground circuit.
@@ -169,9 +168,9 @@ evaluation
   why the AI widget I later built was scoped to the four questions people really ask.
 <!--/long-->
 <!--short:
-- Ran the business single-handed — production, service, purchasing, cash and compliance,
-  with no one to delegate to or escalate to — and took it from a mobile trailer to fixed
-  premises, rebuilding the operation around a different site, hours and customer base.
+- Managed the family business, mainly in the summer seasons — production, service,
+  purchasing and cash — and took it from a mobile trailer to fixed premises, rebuilding the
+  operation around a different site, hours and customer base.
 -->
 
 ### Le Wagon — Part-time Programming Teacher · Remote (France)
