@@ -28,29 +28,29 @@ found defects the tests did not. That measurement layer is now a published libra
 [`ragcite`](https://github.com/pcbeingused333/ragcite), which asserts that it reproduces the
 numbers of the project it was extracted from. Fullstack background across Python, TypeScript
 and Ruby, with production experience shipping and operating what I build. I also fix the
-frameworks this work runs on — **thirty-one merged pull requests** this year. Twelve are in
+frameworks this work runs on — **fifty merged pull requests** this year. Twelve are in
 **Haystack** and its integrations, deepset's framework for production RAG and agent
 pipelines: concurrency and async/sync-parity defects, plus components that dropped a setting
-from `to_dict` so it silently reverted on reload. Six more are in **LangChain.rb**. Plus a
+from `to_dict` so it silently reverted on reload. Nine more are in **LangChain.rb**, and two in Tencent's **WeKnora**. Plus a
 fix to `pydantic-ai`'s eval framework, two in `pyfenn/fenn`, and open fixes to the
 retrieval-evaluation and MMR code in `llama-index-core`.
 <!--/long-->
 <!--short:
 Applied AI engineer in Python: two retrieval and agent systems in production, each shipping
-the harness that measures it, and **thirty-one merged pull requests** this year into the
+the harness that measures it, and **fifty merged pull requests** this year into the
 frameworks they run on. My main project answers over the text of the **GDPR** under a
 constraint generic RAG ignores — every statement names the provision it came from, and the
 system declines when the source does not cover the question. In both projects the harness
 found defects the tests did not. Fullstack across Python, TypeScript and Ruby; twelve of
 those merged fixes are in **Haystack** and its integrations (deepset's RAG and agent
-framework), concurrency and async/sync-parity defects, and six in **LangChain.rb**.
+framework), concurrency and async/sync-parity defects, and nine in **LangChain.rb**.
 -->
 <!--/ai-->
 <!--swe:
-Software engineer working across Python, TypeScript and Ruby, with **thirty-one merged
+Software engineer working across Python, TypeScript and Ruby, with **fifty merged
 pull requests** this year into open-source projects other teams build on: twelve in
-**Haystack** and its integrations (deepset's RAG and agent framework), six in
-**LangChain.rb**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`) and Python
+**Haystack** and its integrations (deepset's RAG and agent framework), nine in
+**LangChain.rb**, two in Tencent's **WeKnora**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`) and Python
 libraries (`pydantic-ai`, `opik`, `phoenix`) — concurrency, serialization and
 error-handling defects. I build and deploy end to end: Python services with their own test
 suites, Next.js front ends, AWS infrastructure in Terraform with CI/CD on GitHub Actions.
@@ -468,13 +468,47 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   behaviour is defined, and `Equals(value=None)` named as the evaluator that does assert it.
   Reported as #7934 with a runnable reproduction; closed by this PR.
 - [`patterns-ai-core/langchainrb`](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) —
-  six merged in the Ruby LLM framework, all edge cases that crashed a caller instead of
+  nine merged in the Ruby LLM framework. Six are edge cases that crashed a caller instead of
   degrading: the JSONL loader raising on a blank line, `#tool_calls` raising `NoMethodError`
   on a response with no usable choices (an error payload, a content-filtered completion) or
   an explicit `"tool_calls": null` — which is what closed the year-old issue #1011 — the
   directory loader returning an exception object into the results array, and
   `AnthropicResponse#tool_calls` returning only the first `tool_use` block, silently dropping
   Claude's parallel tool calls. Each ships a regression test.
+  [#1055](https://github.com/patterns-ai-core/langchainrb/pull/1055): `Anthropic#chat` sent
+  `temperature: 0.0` on every request, which current Claude models reject with a 400 — so
+  every `#chat` and every `Assistant` run failed as soon as `chat_model` named one; it now
+  sends only a temperature the caller set.
+  [#1056](https://github.com/patterns-ai-core/langchainrb/pull/1056): `PromptTemplate#format`
+  unescaped `{{…}}` before substituting, re-scanned inserted values for placeholders (so user
+  input containing `{context}` was expanded), and passed values to `gsub` as replacement
+  strings, mangling backslashes in code or paths; it now formats in a single pass.
+  [#1057](https://github.com/patterns-ai-core/langchainrb/pull/1057): streamed `Anthropic#chat`
+  rebuilt only text and `tool_use` blocks from the chunks, so a `thinking` block left a `nil`
+  in the content and the response raised `NoMethodError` — on every Claude 5 model, which
+  thinks by default. Thinking and redacted-thinking blocks are now rebuilt with their
+  signature, matching the non-streamed shape.
+- [`Tencent/WeKnora`](https://github.com/Tencent/WeKnora/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) —
+  open-source LLM knowledge platform (RAG, agent and wiki), 33k stars.
+  [#4155](https://github.com/Tencent/WeKnora/pull/4155): six current Claude models were
+  catalogued as accepting `temperature` and `top_p`, so the internal pipelines that set one —
+  query understanding, entity extraction, compaction, data analysis — got a 400 on those
+  models. Both flags are needed: with only the temperature one, the adapter fell through to
+  sending `top_p`. [#4158](https://github.com/Tencent/WeKnora/pull/4158), the follow-up the
+  maintainers agreed on: catalog entries for Claude Opus, Sonnet and Haiku 5.5, which
+  otherwise resolved to vendor defaults they reject (budget thinking, sampling parameters),
+  with pinned pricing/context metadata and regression coverage.
+- [`AllYourBot/hostedgpt` #823](https://github.com/AllYourBot/hostedgpt/pull/823) — self-hosted
+  ChatGPT alternative in Rails. One-off calls read the reply as the first content block's
+  `text`, but current Claude models can return a `thinking` block first, so auto-titling got
+  `nil` and an Anthropic key test returned nothing — intermittently, since adaptive thinking
+  skips short prompts. Now reads the first `text` block, with a test that errors on the old
+  code.
+- [`posit-dev/chatlas` #448](https://github.com/posit-dev/chatlas/pull/448) — Posit's Python
+  library for LLM chat apps. `ChatBedrockAnthropic(reasoning=)` only took a token budget,
+  which its own default model rejects with a 400, so thinking could not be turned on there at
+  all. It now accepts an effort level (adaptive thinking) like `ChatAnthropic` does, through
+  one helper both share, with a test that fails on the old code.
 - [`pyfenn/fenn` #277](https://github.com/pyfenn/fenn/pull/277) — added `.docx` support to
   the RAG document loader, so the framework ingests Word documents alongside PDFs and text.
 - [`pyfenn/fenn` #286](https://github.com/pyfenn/fenn/pull/286) — corrected the RAG
@@ -489,7 +523,7 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   fixed `RSpec/LeadingSubject` autocorrecting a subject to a position above another
   subject.
 - [`Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) —
-  six merged in a Ruby mailer gem. Five shipped in its 1.1.0 release: MailerSend, Mailtrap
+  eleven merged in a Ruby mailer gem. Five shipped in its 1.1.0 release: MailerSend, Mailtrap
   and SMTP.com provider integrations, which closed the gem's standing request for more
   providers; a `NameError` that broke Mailgun and Mailjet on Ruby 3.4 — `Base64` left the
   default gems and those two were the only providers calling it without requiring it, so the
@@ -505,6 +539,28 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   commas including the one inside that quoted name, tearing a single address in two; three
   providers that still hand-rolled their own parsing instead of using the helper
   (Smtp2go, Lettermint, SES) had the identical break outside it entirely.
+  Five more, merged together:
+  [#64](https://github.com/Rails-Designer/courrier/pull/64): a response with a `nil` body (a
+  204 from a subscriber delete, or any provider returning an empty success payload) reaches
+  `JSON.parse(nil)` and raises `TypeError` on a request that actually succeeded; now returns
+  `{}` before parsing, same as the existing `JSON::ParserError` fallback.
+  [#65](https://github.com/Rails-Designer/courrier/pull/65): setting a layout for only one of
+  `html`/`text` — the normal case in every example in the README — crashes in the
+  constructor, because mapping both formats through `to_h` yields `nil` for the missing one
+  and `to_h` requires a 2-element array from every block result.
+  [#66](https://github.com/Rails-Designer/courrier/pull/66): four subscriber providers build
+  request URLs from the raw email address; three don't URL-encode it, so a `+tag` Gmail
+  address is mangled into the wrong path or query, and Mailchimp addresses a member by the
+  MD5 hash of the lowercased email rather than the raw string, so delete/lookup calls 404
+  silently.
+  [#67](https://github.com/Rails-Designer/courrier/pull/67): wrapping the email body in a
+  layout via `String#%` treats every bare `%` in the layout as a format directive, so
+  `width: 100%` or `line-height: 150%` in an ordinary HTML email layout raises `ArgumentError`
+  before the email sends.
+  [#68](https://github.com/Rails-Designer/courrier/pull/68): `Address.with_name`'s quoting
+  escaped `"` but not `\`, so a display name containing a backslash produced a `quoted-pair`
+  RFC 5322 requires but never emits, corrupting the header — a trailing backslash even
+  escapes the closing quote and runs the quoted string into the address itself.
 - [`Arize-ai/phoenix`](https://github.com/Arize-ai/phoenix/pull/16002) — AI observability and
   evals platform. `MessageTemplate.__init__` converted a message role with `MessageRole(role)`
   directly instead of the module's own `normalize_role` helper, so the documented OpenAI-style
@@ -513,6 +569,45 @@ filters. Python, embeddings, pgvector, PostgreSQL.
   (LangChain's and Google's). A non-string role also fell through both branches without
   raising, surfacing later as an unrelated `AttributeError` instead of a clean error at
   construction. Routed through `normalize_role`, net seven lines shorter.
+- [`rubyforgood/human-essentials` #5656](https://github.com/rubyforgood/human-essentials/pull/5656) —
+  a Rails inventory app for nonprofit essentials banks. Its participant drop-downs
+  displayed one column and were ordered by another, so the list was sorted on a value
+  the user could not see, and the tie-break fell through to the cluster's collation,
+  which does not match between CI and production. Now ordered on the name actually
+  rendered, with runs of digits compared by value so "Store 9" precedes "Store 10".
+  Brakeman flagged my first version as SQL injection for interpolating into `Arel.sql`,
+  so the expression is a literal constant with nothing interpolated. The maintainer also
+  asked for a survey of every other drop-down in the app, which I traced from each
+  rendered `<select>` back to the query that builds it.
+- [`Rails-Designer/icons`](https://github.com/Rails-Designer/icons/pulls?q=is%3Apr+author%3Apcbeingused333) —
+  add any icon library to a Ruby app.
+  [#19](https://github.com/Rails-Designer/icons/pull/19): an icon file that isn't valid SVG
+  (empty, truncated, or an HTML error page from a bad sync) reaches `at_css("svg")`, which
+  returns `nil`, and the sprite builder crashes with `NoMethodError` instead of skipping the
+  file the way an already-missing icon is handled.
+  [#20](https://github.com/Rails-Designer/icons/pull/20): a sync failure's own cleanup prompt
+  reads from stdin unconditionally; run non-interactively (CI, cron), `$stdin.gets` returns
+  `nil` and the cleanup code itself raises `NoMethodError` — which, because it runs inside the
+  `rescue` for the real failure, replaces and hides the actual sync error instead of letting
+  it propagate.
+- [`Rails-Designer/perron`](https://github.com/Rails-Designer/perron/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) —
+  static site generator for Rails. Four merged, all crashes on content a real site can
+  produce.
+  [#214](https://github.com/Rails-Designer/perron/pull/214): `Relation#order` sorts with
+  `sort_by`, so one resource with a `nil` value for the ordering attribute — an optional
+  frontmatter date or position — crashes the whole query; a sibling method already guarded
+  for this.
+  [#215](https://github.com/Rails-Designer/perron/pull/215): a post whose body opens with a
+  `---` thematic break and contains a second `---` gets misread as frontmatter, and
+  `YAML.safe_load` on real prose returns a `String`, not a `Hash`, so iterating it as
+  frontmatter raises.
+  [#216](https://github.com/Rails-Designer/perron/pull/216): a typo'd date in a filename
+  (`2024-99-99-post.md`) matches the date regex structurally and reaches `Date.new`, which
+  raises and takes down the whole collection load.
+  [#217](https://github.com/Rails-Designer/perron/pull/217): joining a base URL with a
+  relative path that has no leading slash drops the separator entirely
+  (`https://example.comcover.jpg`), breaking `og:image` and feed image rewrites for the
+  common case of a bare filename in frontmatter.
 - [`comet-ml/opik`](https://github.com/comet-ml/opik/pull/8276) — `SpearmanRanking` checked
   that two rankings had the same length and the same *set* of items, but not that each was a
   permutation. A duplicate that kept both sets equal slipped through, and the rank lookup
@@ -557,16 +652,6 @@ one class of defect and three were invisible to the test suite for the same reas
 - [`rubocop/rubocop-performance` #529](https://github.com/rubocop/rubocop-performance/pull/529) —
   fixed `Performance/ConstantRegexp` emitting invalid code when autocorrecting a regexp
   used as a pattern in `case`/`in` pattern matching.
-- [`rubyforgood/human-essentials` #5656](https://github.com/rubyforgood/human-essentials/pull/5656) —
-  a Rails inventory app for nonprofit essentials banks. Its participant drop-downs
-  displayed one column and were ordered by another, so the list was sorted on a value
-  the user could not see, and the tie-break fell through to the cluster's collation,
-  which does not match between CI and production. Now ordered on the name actually
-  rendered, with runs of digits compared by value so "Store 9" precedes "Store 10".
-  Brakeman flagged my first version as SQL injection for interpolating into `Arel.sql`,
-  so the expression is a literal constant with nothing interpolated. The maintainer also
-  asked for a survey of every other drop-down in the app, which I traced from each
-  rendered `<select>` back to the query that builds it.
 - [`confident-ai/deepeval`](https://github.com/confident-ai/deepeval/pulls?q=is%3Apr+author%3Apcbeingused333) —
   four fixes in an LLM-evaluation framework, found by reading the metric and benchmark
   code rather than from an issue.
@@ -630,62 +715,11 @@ one class of defect and three were invisible to the test suite for the same reas
   response the instrumentation exists to observe transparently, which the package's own
   contributing guide states instrumentation must never do. Every other `choices` access in
   the same package already guards against this.
-- [`Rails-Designer/perron`](https://github.com/Rails-Designer/perron/pulls?q=is%3Apr+author%3Apcbeingused333) —
-  static site generator for Rails. Five fixes, all crashes on configuration or content a real
-  site can produce.
-  [#213](https://github.com/Rails-Designer/perron/pull/213): an omitted `base_path` — a
-  documented optional keyword — breaks pagination links once a collection has more than one
-  page, and an unset `per_page` reaches `clamp` as `nil` or zero, producing a
-  `TypeError`/`FloatDomainError` instead of a clear error.
-  [#214](https://github.com/Rails-Designer/perron/pull/214): `Relation#order` sorts with
-  `sort_by`, so one resource with a `nil` value for the ordering attribute — an optional
-  frontmatter date or position — crashes the whole query; a sibling method already guarded
-  for this.
-  [#215](https://github.com/Rails-Designer/perron/pull/215): a post whose body opens with a
-  `---` thematic break and contains a second `---` gets misread as frontmatter, and
-  `YAML.safe_load` on real prose returns a `String`, not a `Hash`, so iterating it as
-  frontmatter raises.
-  [#216](https://github.com/Rails-Designer/perron/pull/216): a typo'd date in a filename
-  (`2024-99-99-post.md`) matches the date regex structurally and reaches `Date.new`, which
-  raises and takes down the whole collection load.
-  [#217](https://github.com/Rails-Designer/perron/pull/217): joining a base URL with a
-  relative path that has no leading slash drops the separator entirely
-  (`https://example.comcover.jpg`), breaking `og:image` and feed image rewrites for the
-  common case of a bare filename in frontmatter.
-- [`Rails-Designer/icons`](https://github.com/Rails-Designer/icons/pulls?q=is%3Apr+author%3Apcbeingused333) —
-  add any icon library to a Ruby app.
-  [#19](https://github.com/Rails-Designer/icons/pull/19): an icon file that isn't valid SVG
-  (empty, truncated, or an HTML error page from a bad sync) reaches `at_css("svg")`, which
-  returns `nil`, and the sprite builder crashes with `NoMethodError` instead of skipping the
-  file the way an already-missing icon is handled.
-  [#20](https://github.com/Rails-Designer/icons/pull/20): a sync failure's own cleanup prompt
-  reads from stdin unconditionally; run non-interactively (CI, cron), `$stdin.gets` returns
-  `nil` and the cleanup code itself raises `NoMethodError` — which, because it runs inside the
-  `rescue` for the real failure, replaces and hides the actual sync error instead of letting
-  it propagate.
-- [`Rails-Designer/courrier`](https://github.com/Rails-Designer/courrier/pulls?q=is%3Apr+author%3Apcbeingused333) —
-  five more open in the same mailer gem as above.
-  [#64](https://github.com/Rails-Designer/courrier/pull/64): a response with a `nil` body (a
-  204 from a subscriber delete, or any provider returning an empty success payload) reaches
-  `JSON.parse(nil)` and raises `TypeError` on a request that actually succeeded; now returns
-  `{}` before parsing, same as the existing `JSON::ParserError` fallback.
-  [#65](https://github.com/Rails-Designer/courrier/pull/65): setting a layout for only one of
-  `html`/`text` — the normal case in every example in the README — crashes in the
-  constructor, because mapping both formats through `to_h` yields `nil` for the missing one
-  and `to_h` requires a 2-element array from every block result.
-  [#66](https://github.com/Rails-Designer/courrier/pull/66): four subscriber providers build
-  request URLs from the raw email address; three don't URL-encode it, so a `+tag` Gmail
-  address is mangled into the wrong path or query, and Mailchimp addresses a member by the
-  MD5 hash of the lowercased email rather than the raw string, so delete/lookup calls 404
-  silently.
-  [#67](https://github.com/Rails-Designer/courrier/pull/67): wrapping the email body in a
-  layout via `String#%` treats every bare `%` in the layout as a format directive, so
-  `width: 100%` or `line-height: 150%` in an ordinary HTML email layout raises `ArgumentError`
-  before the email sends.
-  [#68](https://github.com/Rails-Designer/courrier/pull/68): `Address.with_name`'s quoting
-  escaped `"` but not `\`, so a display name containing a backslash produced a `quoted-pair`
-  RFC 5322 requires but never emits, corrupting the header — a trailing backslash even
-  escapes the closing quote and runs the quoted string into the address itself.
+- [`Rails-Designer/perron` #213](https://github.com/Rails-Designer/perron/pull/213) — static
+  site generator for Rails: an omitted `base_path` — a documented optional keyword — breaks
+  pagination links once a collection has more than one page, and an unset `per_page` reaches
+  `clamp` as `nil` or zero, producing a `TypeError`/`FloatDomainError` instead of a clear
+  error. Four sibling fixes are merged, above.
 
 **Reported**
 
@@ -724,7 +758,7 @@ bug report someone else has to reproduce first.
   by #286 above.
 <!--/long-->
 <!--short:
-**Merged — thirty-one pull requests this year.** Twelve across
+**Merged — fifty pull requests this year.** Twelve across
 [`deepset-ai/haystack`](https://github.com/deepset-ai/haystack/pulls?q=is%3Apr+author%3Apcbeingused333)
 and its integrations, each with a regression test I verified fails with the fix reverted —
 concurrency defects on the async path (four of them invisible to the test suite for the same
@@ -733,18 +767,21 @@ reason, written up together:
 async/sync-parity gaps, and components dropping an `__init__` parameter from `to_dict` so the
 setting silently reverted on reload, found by an AST audit of `__init__` against `to_dict`
 ([#3808](https://github.com/deepset-ai/haystack-core-integrations/pull/3808)). Also merged:
-[six in `LangChain.rb`](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged),
+[nine in `LangChain.rb`](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged),
 edge cases that crashed a caller instead of degrading; a documentation fix in
 [`pydantic-ai`](https://github.com/pydantic/pydantic-ai/pull/7936) for an eval case that
-could not fail; two in [`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277); eight across
-Ruby tooling and a mailer gem — five shipped in `courrier` 1.1.0, one since; a
+could not fail; Claude-compatibility fixes in [`Tencent/WeKnora`](https://github.com/Tencent/WeKnora/pull/4155) (two),
+[`hostedgpt`](https://github.com/AllYourBot/hostedgpt/pull/823) and
+[`chatlas`](https://github.com/posit-dev/chatlas/pull/448); two in
+[`pyfenn/fenn`](https://github.com/pyfenn/fenn/pull/277); twenty across Ruby tooling, a mailer gem, a
+static site generator and a Rails app; a
 ranking-validity fix in [`opik`](https://github.com/comet-ml/opik/pull/8276); and a
 role-alias fix in [`Arize-ai/phoenix`](https://github.com/Arize-ai/phoenix/pull/16002).
 
 **Open** — [five in `llama-index-core`](https://github.com/run-llama/llama_index/pulls?q=is%3Apr+author%3Apcbeingused333)
 and [four in `deepeval`](https://github.com/confident-ai/deepeval/pulls?q=is%3Apr+author%3Apcbeingused333) —
 metric/scoring correctness bugs — plus open fixes in `ragas`, `giskard` and `guardrails`,
-and across Ruby tooling and two Rails apps.
+and across Ruby tooling.
 Defects I only reported, each with a standalone reproduction, are triaged and taken up the
 same way: [`pydantic-ai` #7927](https://github.com/pydantic/pydantic-ai/issues/7927) —
 `LLMJudge` grading a `bytes` output rendered as one decimal byte per line, no error — is
