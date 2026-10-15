@@ -28,8 +28,8 @@ found defects the tests did not. That measurement layer is now a published libra
 [`ragcite`](https://github.com/pcbeingused333/ragcite), which asserts that it reproduces the
 numbers of the project it was extracted from. Fullstack background across Python, TypeScript
 and Ruby, with production experience shipping and operating what I build. I also fix the
-frameworks this work runs on — **66 merged pull requests** across 17 projects since July,
-with a median of two days to merge. The largest groups: 22 in **LangChain.rb**, most of its
+frameworks this work runs on — **73 merged pull requests** across 17 projects since July,
+with a median of about a day to merge. The largest groups: 29 in **LangChain.rb**, most of its
 LLM-provider and tool-calling layer; 12 in **Haystack** and its integrations, deepset's
 framework for production RAG and agent pipelines (concurrency and async/sync-parity
 defects); and the breakage Claude 5 and the 1.x Anthropic SDK caused in about a dozen LLM
@@ -37,19 +37,19 @@ projects, usually merged within hours.
 <!--/long-->
 <!--short:
 Applied AI engineer in Python: two retrieval and agent systems in production, each shipping
-the harness that measures it, and **66 merged pull requests** this year into the
+the harness that measures it, and **73 merged pull requests** this year into the
 frameworks they run on. My main project answers over the text of the **GDPR** under a
 constraint generic RAG ignores — every statement names the provision it came from, and the
 system declines when the source does not cover the question. In both projects the harness
 found defects the tests did not. Fullstack across Python, TypeScript and Ruby; twelve of
 those merged fixes are in **Haystack** and its integrations (deepset's RAG and agent
-framework), concurrency and async/sync-parity defects, and 22 in **LangChain.rb**.
+framework), concurrency and async/sync-parity defects, and 29 in **LangChain.rb**.
 -->
 <!--/ai-->
 <!--swe:
-Software engineer working across Python, TypeScript and Ruby, with **66 merged
+Software engineer working across Python, TypeScript and Ruby, with **73 merged
 pull requests** this year into open-source projects other teams build on: twelve in
-**Haystack** and its integrations (deepset's RAG and agent framework), 22 in
+**Haystack** and its integrations (deepset's RAG and agent framework), 29 in
 **LangChain.rb**, two in Tencent's **WeKnora**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`, `perron`) and Python
 libraries (`pydantic-ai`, `opik`, `phoenix`) — concurrency, serialization and
 error-handling defects. I build and deploy end to end: Python services with their own test
@@ -389,9 +389,9 @@ filters. Python, embeddings, pgvector, PostgreSQL.
 ## Open source
 
 <!--long-->
-**66 merged pull requests across 17 open-source projects since July 2026** — Haystack,
+**73 merged pull requests across 17 open-source projects since July 2026** — Haystack,
 LangChain.rb, Arize Phoenix, Opik, TruLens, pydantic-ai, Tencent's WeKnora and others.
-Median time to merge is two days; 28 merged within 24 hours. Most are fixes I found by reading
+Median time to merge is about a day; 35 merged within 24 hours. Most are fixes I found by reading
 the code or tracking a provider change rather than picking from an issue tracker, and each
 ships a regression test I verified fails with the fix reverted. They fall into five patterns:
 
@@ -418,7 +418,7 @@ ships a regression test I verified fails with the fix reverted. They fall into f
   [`haystack` #12662](https://github.com/deepset-ai/haystack/pull/12662) (50 expanded queries meant 50
   concurrent embedding calls whatever the limit). Written up as
   [Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
-- **The provider and tool-calling layer of LangChain.rb.** 22 merged, usually the same day,
+- **The provider and tool-calling layer of LangChain.rb.** 29 merged, usually the same day,
   across its Anthropic, OpenAI, Gemini, Ollama, Cohere and Mistral adapters: `tool_choice`
   `"none"`/`"auto"` sent in the shape each API expects, an agent loop that could never stop
   calling a forced tool, streamed tool calls lost on Ollama, thinking blocks dropped from the
@@ -454,13 +454,13 @@ and a drop-down ordering fix in [`human-essentials`](https://github.com/rubyforg
 
 **What worked:** small PRs with a failing-first regression test and the local verification
 pasted in; answering reviews quickly; going back to maintainers who already trusted the
-work (LangChain.rb went from 6 to 22 merged); and fixing what a release had just broken.
+work (LangChain.rb went from 6 to 29 merged); and fixing what a release had just broken.
 **What didn't:** crowded repos where the maintainer fixes it first, and repos where CI never
 runs for fork PRs.
 <!--/long-->
 <!--short:
-**66 merged pull requests across 17 open-source projects since July 2026** (Haystack,
-LangChain.rb, Phoenix, Opik, TruLens, pydantic-ai, WeKnora), median two days to merge, each
+**73 merged pull requests across 17 open-source projects since July 2026** (Haystack,
+LangChain.rb, Phoenix, Opik, TruLens, pydantic-ai, WeKnora), median about a day to merge, each
 with a regression test verified to fail without the fix:
 
 - **Provider changes:** Claude 5 and the 1.x Anthropic SDK broke the same assumptions in
@@ -472,7 +472,7 @@ with a regression test verified to fail without the fix:
   loop, a lock shared across loops, `max_workers` ignored. Eight merged, plus four `to_dict`
   fixes from an AST audit
   ([write-up](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency)).
-- **LangChain.rb's provider and tool-calling layer:** [22 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged),
+- **LangChain.rb's provider and tool-calling layer:** [29 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged),
   usually the same day, across six provider adapters.
 - **Edge cases that crash the whole flow:** empty `choices`, `nil`, division by zero —
   courrier (11), perron (4), icons (2).
