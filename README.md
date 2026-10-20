@@ -1,7 +1,7 @@
 # Alex Castillo González
 
 <!--ai-->
-**Applied AI Engineer · Python / LLM**
+**Applied AI Engineer · LLM integration: streaming, tool calls, usage, migrations**
 <!--/ai-->
 <!--swe:
 **Software Engineer · Python / TypeScript / Ruby**
@@ -27,31 +27,33 @@ tool trajectories and answer grounding for the MCP agent — and in each case th
 found defects the tests did not. That measurement layer is now a published library,
 [`ragcite`](https://github.com/pcbeingused333/ragcite), which asserts that it reproduces the
 numbers of the project it was extracted from. Fullstack background across Python, TypeScript
-and Ruby, with production experience shipping and operating what I build. I also fix the
-frameworks this work runs on — **110 merged pull requests** across 32 projects since July,
-with a median of under a day to merge. The largest groups: 29 in **LangChain.rb**, most of its
-LLM-provider and tool-calling layer; 12 in **Haystack** and its integrations, deepset's
-framework for production RAG and agent pipelines (concurrency and async/sync-parity
-defects); and the breakage Claude 5 and the 1.x Anthropic SDK caused in about a dozen LLM
-projects, usually merged within hours.
+and Ruby, with production experience shipping and operating what I build. Most of my recent
+work is the **integration layer between applications and LLM providers** — streamed tool
+calls, token and cost accounting, and code that breaks when a provider changes or retires a
+model — fixed upstream in the SDKs and frameworks themselves: **160 merged pull requests**
+across 64 projects since July (83% of those decided were merged; median 16 hours to merge),
+including 29 in **LangChain.rb**, 12 in deepset's **Haystack** and its integrations, and fixes
+in **LiteLLM**, **pydantic-ai**, **Arize Phoenix**, **Opik**, **redis-py** and **OpenTelemetry**'s
+GenAI instrumentation.
 <!--/long-->
 <!--short:
-Applied AI engineer in Python: two retrieval and agent systems in production, each shipping
-the harness that measures it, and **110 merged pull requests** this year into the
-frameworks they run on. My main project answers over the text of the **GDPR** under a
+Applied AI engineer in Python working on the **LLM integration layer** — streaming, tool
+calls, usage accounting, model migrations — with **160 merged pull requests** this year into
+the SDKs and frameworks it lives in (83% of those decided), and two retrieval and agent
+systems that ship the harness that measures them. My main project answers over the text of the **GDPR** under a
 constraint generic RAG ignores — every statement names the provision it came from, and the
 system declines when the source does not cover the question. In both projects the harness
-found defects the tests did not. Fullstack across Python, TypeScript and Ruby; twelve of
-those merged fixes are in **Haystack** and its integrations (deepset's RAG and agent
-framework), concurrency and async/sync-parity defects, and 29 in **LangChain.rb**.
+found defects the tests did not. Fullstack across Python, TypeScript and Ruby; merged fixes
+include 29 in **LangChain.rb**, 12 in deepset's **Haystack**, and **LiteLLM**'s streaming cost
+accounting.
 -->
 <!--/ai-->
 <!--swe:
-Software engineer working across Python, TypeScript and Ruby, with **110 merged
-pull requests** this year into open-source projects other teams build on: twelve in
+Software engineer working across Python, TypeScript and Ruby, with **160 merged
+pull requests** across 64 open-source projects this year (83% of those decided were merged): twelve in
 **Haystack** and its integrations (deepset's RAG and agent framework), 29 in
-**LangChain.rb**, twelve in the Rails app **Sure** (personal finance, 10k★), two in Tencent's **WeKnora**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`, `perron`) and Python
-libraries (`pydantic-ai`, `opik`, `phoenix`, `pipenv`, `pdm`) — concurrency, serialization and
+**LangChain.rb**, twelve in the Rails app **Sure** (personal finance, 10k★), nine in **pipenv**, **LiteLLM** and **redis-py**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`, `perron`) and Python
+libraries (`pydantic-ai`, `opik`, `phoenix`, `pdm`) — concurrency, serialization and
 error-handling defects. I build and deploy end to end: Python services with their own test
 suites, Next.js front ends, AWS infrastructure in Terraform with CI/CD on GitHub Actions.
 Earlier, fullstack Rails at TECNOBIT and teaching Ruby and SQL at Le Wagon. Before moving
@@ -389,11 +391,49 @@ filters. Python, embeddings, pgvector, PostgreSQL.
 ## Open source
 
 <!--long-->
-**110 merged pull requests across 32 open-source projects since July 2026** — Haystack,
-LangChain.rb, Sure, pipenv, Arize Phoenix, Opik, TruLens, pydantic-ai, Tencent's WeKnora and others.
-Median time to merge is under a day; 67 merged within 24 hours. Most are fixes I found by reading
-the code or tracking a provider change rather than picking from an issue tracker, and each
-ships a regression test I verified fails with the fix reverted. They fall into five patterns:
+**160 merged pull requests across 64 open-source projects since July 2026**, 83% of those
+decided (32 closed unmerged); median 16 hours to merge, 94 merged within 24 hours. Most are
+in the layer between applications and LLM providers. Each ships a regression test that fails
+without the fix. Five that show the kind of work:
+
+- **LiteLLM — streamed calls billed differently from non-streamed ones**
+  ([#44795](https://github.com/BerriAI/litellm/pull/44795)). *Bug:* a streamed Vertex AI
+  pass-through call cost less than the same call non-streamed. *Cause:* the stream builder
+  priced the call without its location, so regional endpoints missed their 10% uplift and
+  custom-priced deployments fell back to list price. *Fix:* the logger prices both modes,
+  including cut-off streams, with the deployment's location. *Impact:* spend tracking in a
+  61k★ proxy now matches across streaming and non-streaming.
+- **LLM Tornado — three parallel tool calls executed six times**
+  ([#205](https://github.com/lofcz/LLMTornado/pull/205)). *Bug:* with Anthropic streaming and
+  `Microsoft.Extensions.AI`, each parallel tool ran more than once and the follow-up request
+  was rejected. *Cause:* every `content_block_stop` re-yielded all tool calls seen so far
+  (1, then 1+2, then 1+2+3), and the tool-invocation middleware acted on each. *Fix:* yield
+  the calls once, at the end of the stream, with the final usage. *Impact:* merged the same
+  day; seven merged in that repo, including the streamed input and cache token counts
+  ([#214](https://github.com/lofcz/LLMTornado/pull/214)).
+- **Haystack — async paths that drifted from the sync ones**
+  ([#12662](https://github.com/deepset-ai/haystack/pull/12662),
+  [integrations #3790](https://github.com/deepset-ai/haystack-core-integrations/pull/3790)).
+  *Bug:* 50 expanded queries meant 50 concurrent embedding calls whatever the limit; an
+  `asyncio.Lock` was shared across event loops. *Cause:* `run_async` re-implemented `run`
+  without its guards, and the tests only called `run`. *Fix:* restore the limits and
+  per-loop locks, with async tests. *Impact:* 12 merged across deepset's framework;
+  [written up](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
+- **LangChain.rb — the provider and tool-calling layer**
+  ([29 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)).
+  *Bugs:* `tool_choice` sent in the wrong shape per API, an agent loop that could never stop
+  calling a forced tool, streamed tool calls lost on Ollama, thinking blocks dropped from the
+  tool-use loop. *Fix:* one adapter at a time across Anthropic, OpenAI, Gemini, Ollama, Cohere
+  and Mistral. *Impact:* most merged the same day; it is now most of that layer.
+- **Model retirements — defaults that stop working on a date**
+  ([AgentScope-Java #3670](https://github.com/agentscope-ai/agentscope-java/pull/3670),
+  [go-micro #5011](https://github.com/micro/go-micro/pull/5011)). *Bug:* SDKs defaulting to
+  Claude models that Anthropic retires (or already had). *Cause:* hard-coded model IDs, and in
+  AgentScope a context-window table with no Claude 5 entry, so the obvious one-line swap would
+  have resolved the window to 0. *Fix:* new default plus the missing table entry, with a test
+  that fails on the old one. *Impact:* merged the same day in both.
+
+Beyond those case studies, the work falls into five patterns:
 
 - **When the LLM provider changes, the code built on it breaks.** Claude 5 and the 1.x
   Anthropic SDK broke the same few assumptions in about a dozen projects: reading a reply as
@@ -449,7 +489,7 @@ ships a regression test I verified fails with the fix reverted. They fall into f
 
 Also merged: twelve in the Rails app [`we-promise/sure`](https://github.com/we-promise/sure/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
 (personal finance, 10k★: provider-setup flows from Add Account, wrong HTTP methods, data kept
-when merging duplicates); eight in [`pipenv`](https://github.com/pypa/pipenv/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
+when merging duplicates); nine in [`pipenv`](https://github.com/pypa/pipenv/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
 and one in [`pdm`](https://github.com/pdm-project/pdm/pull/3931) (PEP 751 `pylock.toml` and inline script
 metadata); token usage of failed Responses API calls in [`pipecat`](https://github.com/pipecat-ai/pipecat/pull/6215);
 Ruby and Rails tooling — two in [`rubocop-rspec`](https://github.com/rubocop/rubocop-rspec/pull/2209)
@@ -464,25 +504,25 @@ work (LangChain.rb went from 6 to 29 merged); and fixing what a release had just
 runs for fork PRs.
 <!--/long-->
 <!--short:
-**110 merged pull requests across 32 open-source projects since July 2026** (Haystack,
-LangChain.rb, Sure, pipenv, Phoenix, Opik, pydantic-ai, WeKnora), median under a day to merge, each
-with a regression test verified to fail without the fix:
+**160 merged pull requests across 64 open-source projects since July 2026**, 83% of those
+decided; median 16 hours to merge. Mostly the layer between applications and LLM providers,
+each with a regression test that fails without the fix:
 
-- **Provider changes:** Claude 5 and the 1.x Anthropic SDK broke the same assumptions in
-  about a dozen LLM projects (`content[0].text` vs thinking blocks, rejected `temperature` or
-  forced `tool_choice`, removed APIs, Bedrock IDs). Merged in WeKnora, TruLens, hostedgpt,
-  reward-bench, chatlas and LangChain.rb, median about eight hours
-  (e.g. [WeKnora #4155](https://github.com/Tencent/WeKnora/pull/4155)).
-- **Haystack async paths:** `run_async` drifting from `run` — blocking calls on the event
-  loop, a lock shared across loops, `max_workers` ignored. Eight merged, plus four `to_dict`
-  fixes from an AST audit
-  ([write-up](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency)).
-- **LangChain.rb's provider and tool-calling layer:** [29 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged),
-  usually the same day, across six provider adapters.
-- **Edge cases that crash the whole flow:** empty `choices`, `nil`, division by zero —
-  courrier (11), perron (4), icons (2).
-- **Eval metrics that are silently wrong:** merged in opik, phoenix and pydantic-ai; open in
-  llama-index-core and deepeval.
+- **LiteLLM** ([#44795](https://github.com/BerriAI/litellm/pull/44795)): streamed Vertex AI
+  pass-through calls were priced without their location, so regional endpoints missed their
+  10% uplift; now the logger prices streamed and non-streamed calls the same way.
+- **LLM Tornado** ([#205](https://github.com/lofcz/LLMTornado/pull/205)): Anthropic streaming
+  re-yielded every tool call at each block end, so three parallel tools ran six times and the
+  follow-up was rejected; calls are now yielded once with the final usage. Seven merged there.
+- **Haystack** ([#12662](https://github.com/deepset-ai/haystack/pull/12662)): `run_async` had
+  drifted from `run` — no concurrency limit, a lock shared across event loops. 12 merged in
+  deepset's framework ([write-up](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency)).
+- **LangChain.rb** ([29 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)):
+  `tool_choice` shapes, forced-tool loops, streamed tool calls and thinking blocks across six
+  provider adapters, most merged the same day.
+- **Model retirements** ([AgentScope-Java #3670](https://github.com/agentscope-ai/agentscope-java/pull/3670)):
+  replacing a retiring default model, plus the context-window entry without which the swap
+  would have resolved the window to 0.
 -->
 
 ---
