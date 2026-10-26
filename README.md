@@ -30,29 +30,29 @@ numbers of the project it was extracted from. Fullstack background across Python
 and Ruby, with production experience shipping and operating what I build. Most of my recent
 work is the **integration layer between applications and LLM providers** — streamed tool
 calls, token and cost accounting, and code that breaks when a provider changes or retires a
-model — fixed upstream in the SDKs and frameworks themselves: **209 merged pull requests**
-across 75 projects since July (84% of those decided were merged; median 11 hours to merge),
-including 30 in **LangChain.rb**, 12 in deepset's **Haystack** and its integrations, and fixes
+model — fixed upstream in the SDKs and frameworks themselves: **429 merged pull requests**
+across 101 projects since July (86% of those decided were merged; median 16 hours to merge),
+including 69 in **LLM Tornado**, 31 in **LangChain.rb**, 23 in **Mirascope**, 13 in deepset's **Haystack** and its integrations, and fixes
 in **LiteLLM**, **pydantic-ai**, **Arize Phoenix**, **Opik**, **redis-py** and **OpenTelemetry**'s
 GenAI instrumentation.
 <!--/long-->
 <!--short:
 Applied AI engineer in Python working on the **LLM integration layer** — streaming, tool
-calls, usage accounting, model migrations — with **209 merged pull requests** this year into
-the SDKs and frameworks it lives in (84% of those decided), and two retrieval and agent
+calls, usage accounting, model migrations — with **429 merged pull requests** this year into
+the SDKs and frameworks it lives in (86% of those decided), and two retrieval and agent
 systems that ship the harness that measures them. My main project answers over the text of the **GDPR** under a
 constraint generic RAG ignores — every statement names the provision it came from, and the
 system declines when the source does not cover the question. In both projects the harness
 found defects the tests did not. Fullstack across Python, TypeScript and Ruby; merged fixes
-include 30 in **LangChain.rb**, 12 in deepset's **Haystack**, and **LiteLLM**'s streaming cost
+include 69 in **LLM Tornado**, 31 in **LangChain.rb**, 13 in deepset's **Haystack**, and **LiteLLM**'s streaming cost
 accounting.
 -->
 <!--/ai-->
 <!--swe:
-Software engineer working across Python, TypeScript and Ruby, with **209 merged
-pull requests** across 75 open-source projects this year (84% of those decided were merged): twelve in
-**Haystack** and its integrations (deepset's RAG and agent framework), 30 in
-**LangChain.rb**, 13 in the Rails app **Sure** (personal finance, 10k★), nine in **pipenv**, **LiteLLM** and **redis-py**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`, `perron`) and Python
+Software engineer working across Python, TypeScript and Ruby, with **429 merged
+pull requests** across 101 open-source projects this year (86% of those decided were merged): 69 in
+the .NET LLM SDK **LLM Tornado**, 13 in **Haystack** and its integrations (deepset's RAG and agent framework), 31 in
+**LangChain.rb**, 14 in the Rails app **Sure** (personal finance, 10k★), nine in **pipenv**, **LiteLLM** and **redis-py**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`, `perron`) and Python
 libraries (`pydantic-ai`, `opik`, `phoenix`, `pdm`) — concurrency, serialization and
 error-handling defects. I build and deploy end to end: Python services with their own test
 suites, Next.js front ends, AWS infrastructure in Terraform with CI/CD on GitHub Actions.
@@ -391,8 +391,9 @@ filters. Python, embeddings, pgvector, PostgreSQL.
 ## Open source
 
 <!--long-->
-**209 merged pull requests across 75 open-source projects since July 2026**, 84% of those
-decided (39 closed unmerged); median 11 hours to merge, 130 merged within 24 hours. Most are
+**429 merged pull requests across 101 open-source projects since July 2026**, 86% of those
+decided (71 closed unmerged); median 16 hours to merge, 272 merged within 24 hours; 29 of the
+projects have over 10k★. Most are
 in the layer between applications and LLM providers. Each ships a regression test that fails
 without the fix. Five that show the kind of work:
 
@@ -409,7 +410,7 @@ without the fix. Five that show the kind of work:
   was rejected. *Cause:* every `content_block_stop` re-yielded all tool calls seen so far
   (1, then 1+2, then 1+2+3), and the tool-invocation middleware acted on each. *Fix:* yield
   the calls once, at the end of the stream, with the final usage. *Impact:* merged the same
-  day; 13 merged in that repo, including the streamed input and cache token counts
+  day; 69 merged in that repo, including the streamed input and cache token counts
   ([#214](https://github.com/lofcz/LLMTornado/pull/214)).
 - **Haystack — async paths that drifted from the sync ones**
   ([#12662](https://github.com/deepset-ai/haystack/pull/12662),
@@ -417,10 +418,10 @@ without the fix. Five that show the kind of work:
   *Bug:* 50 expanded queries meant 50 concurrent embedding calls whatever the limit; an
   `asyncio.Lock` was shared across event loops. *Cause:* `run_async` re-implemented `run`
   without its guards, and the tests only called `run`. *Fix:* restore the limits and
-  per-loop locks, with async tests. *Impact:* 12 merged across deepset's framework;
+  per-loop locks, with async tests. *Impact:* 13 merged across deepset's framework;
   [written up](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
 - **LangChain.rb — the provider and tool-calling layer**
-  ([30 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)).
+  ([31 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)).
   *Bugs:* `tool_choice` sent in the wrong shape per API, an agent loop that could never stop
   calling a forced tool, streamed tool calls lost on Ollama, thinking blocks dropped from the
   tool-use loop. *Fix:* one adapter at a time across Anthropic, OpenAI, Gemini, Ollama, Cohere
@@ -458,7 +459,7 @@ Beyond those case studies, the work falls into five patterns:
   [`haystack` #12662](https://github.com/deepset-ai/haystack/pull/12662) (50 expanded queries meant 50
   concurrent embedding calls whatever the limit). Written up as
   [Four concurrency bugs on Haystack's async path](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency).
-- **The provider and tool-calling layer of LangChain.rb.** 30 merged, usually the same day,
+- **The provider and tool-calling layer of LangChain.rb.** 31 merged, usually the same day,
   across its Anthropic, OpenAI, Gemini, Ollama, Cohere and Mistral adapters: `tool_choice`
   `"none"`/`"auto"` sent in the shape each API expects, an agent loop that could never stop
   calling a forced tool, streamed tool calls lost on Ollama, thinking blocks dropped from the
@@ -487,10 +488,12 @@ Beyond those case studies, the work falls into five patterns:
   output rendered as one decimal byte per line, was reported with a reproduction and
   accepted.
 
-Also merged: 13 in the Rails app [`we-promise/sure`](https://github.com/we-promise/sure/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
+Also merged: 20 in the AI CLI [`Fabric`](https://github.com/danielmiessler/Fabric/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
+(44k★: sampling parameters each vendor plugin dropped or sent to models that reject them); 14 in Pydantic's
+[`logfire`](https://github.com/pydantic/logfire/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged); 14 in the Rails app [`we-promise/sure`](https://github.com/we-promise/sure/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
 (personal finance, 10k★: provider-setup flows from Add Account, wrong HTTP methods, data kept
-when merging duplicates); six in the LLM toolkit [`Mirascope`](https://github.com/Mirascope/mirascope/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
-and four in Posit's [`chatlas`](https://github.com/posit-dev/chatlas/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged); nine in [`pipenv`](https://github.com/pypa/pipenv/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
+when merging duplicates); 23 in the LLM toolkit [`Mirascope`](https://github.com/Mirascope/mirascope/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
+and 27 across Posit's [`chatlas`](https://github.com/posit-dev/chatlas/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged), [`pointblank`](https://github.com/posit-dev/pointblank/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged) and [`great-tables`](https://github.com/posit-dev/great-tables/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged); nine in [`pipenv`](https://github.com/pypa/pipenv/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)
 and one in [`pdm`](https://github.com/pdm-project/pdm/pull/3931) (PEP 751 `pylock.toml` and inline script
 metadata); token usage of failed Responses API calls in [`pipecat`](https://github.com/pipecat-ai/pipecat/pull/6215);
 Ruby and Rails tooling — two in [`rubocop-rspec`](https://github.com/rubocop/rubocop-rspec/pull/2209)
@@ -500,13 +503,13 @@ and a drop-down ordering fix in [`human-essentials`](https://github.com/rubyforg
 
 **What worked:** small PRs with a failing-first regression test and the local verification
 pasted in; answering reviews quickly; going back to maintainers who already trusted the
-work (LangChain.rb went from 6 to 30 merged); and fixing what a release had just broken.
+work (LangChain.rb went from 6 to 31 merged, LLM Tornado to 69); and fixing what a release had just broken.
 **What didn't:** crowded repos where the maintainer fixes it first, and repos where CI never
 runs for fork PRs.
 <!--/long-->
 <!--short:
-**209 merged pull requests across 75 open-source projects since July 2026**, 84% of those
-decided; median 11 hours to merge. Mostly the layer between applications and LLM providers,
+**429 merged pull requests across 101 open-source projects since July 2026**, 86% of those
+decided; median 16 hours to merge. Mostly the layer between applications and LLM providers,
 each with a regression test that fails without the fix:
 
 - **LiteLLM** ([#44795](https://github.com/BerriAI/litellm/pull/44795)): streamed Vertex AI
@@ -514,11 +517,11 @@ each with a regression test that fails without the fix:
   10% uplift; now the logger prices streamed and non-streamed calls the same way.
 - **LLM Tornado** ([#205](https://github.com/lofcz/LLMTornado/pull/205)): Anthropic streaming
   re-yielded every tool call at each block end, so three parallel tools ran six times and the
-  follow-up was rejected; calls are now yielded once with the final usage. 13 merged there.
+  follow-up was rejected; calls are now yielded once with the final usage. 69 merged there.
 - **Haystack** ([#12662](https://github.com/deepset-ai/haystack/pull/12662)): `run_async` had
-  drifted from `run` — no concurrency limit, a lock shared across event loops. 12 merged in
+  drifted from `run` — no concurrency limit, a lock shared across event loops. 13 merged in
   deepset's framework ([write-up](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency)).
-- **LangChain.rb** ([30 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)):
+- **LangChain.rb** ([31 merged](https://github.com/patterns-ai-core/langchainrb/pulls?q=is%3Apr+author%3Apcbeingused333+is%3Amerged)):
   `tool_choice` shapes, forced-tool loops, streamed tool calls and thinking blocks across six
   provider adapters, most merged the same day.
 - **Model retirements** ([AgentScope-Java #3670](https://github.com/agentscope-ai/agentscope-java/pull/3670)):
