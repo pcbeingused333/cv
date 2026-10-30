@@ -30,27 +30,27 @@ numbers of the project it was extracted from. Fullstack background across Python
 and Ruby, with production experience shipping and operating what I build. Most of my recent
 work is the **integration layer between applications and LLM providers** — streamed tool
 calls, token and cost accounting, and code that breaks when a provider changes or retires a
-model — fixed upstream in the SDKs and frameworks themselves: **429 merged pull requests**
-across 101 projects since July (86% of those decided were merged; median 16 hours to merge),
-including 69 in **LLM Tornado**, 31 in **LangChain.rb**, 23 in **Mirascope**, 13 in deepset's **Haystack** and its integrations, and fixes
+model — fixed upstream in the SDKs and frameworks themselves: **580 merged pull requests**
+across 129 projects since July (87% of those decided were merged; median 15 hours to merge),
+including 85 in **LLM Tornado**, 31 in **LangChain.rb**, 23 in **Mirascope**, 13 in deepset's **Haystack** and its integrations, and fixes
 in **LiteLLM**, **pydantic-ai**, **Arize Phoenix**, **Opik**, **redis-py** and **OpenTelemetry**'s
 GenAI instrumentation.
 <!--/long-->
 <!--short:
 Applied AI engineer in Python working on the **LLM integration layer** — streaming, tool
-calls, usage accounting, model migrations — with **429 merged pull requests** this year into
-the SDKs and frameworks it lives in (86% of those decided), and two retrieval and agent
+calls, usage accounting, model migrations — with **580 merged pull requests** this year into
+the SDKs and frameworks it lives in (87% of those decided), and two retrieval and agent
 systems that ship the harness that measures them. My main project answers over the text of the **GDPR** under a
 constraint generic RAG ignores — every statement names the provision it came from, and the
 system declines when the source does not cover the question. In both projects the harness
 found defects the tests did not. Fullstack across Python, TypeScript and Ruby; merged fixes
-include 69 in **LLM Tornado**, 31 in **LangChain.rb**, 13 in deepset's **Haystack**, and **LiteLLM**'s streaming cost
+include 85 in **LLM Tornado**, 31 in **LangChain.rb**, 13 in deepset's **Haystack**, and **LiteLLM**'s streaming cost
 accounting.
 -->
 <!--/ai-->
 <!--swe:
-Software engineer working across Python, TypeScript and Ruby, with **429 merged
-pull requests** across 101 open-source projects this year (86% of those decided were merged): 69 in
+Software engineer working across Python, TypeScript and Ruby, with **580 merged
+pull requests** across 129 open-source projects this year (87% of those decided were merged): 85 in
 the .NET LLM SDK **LLM Tornado**, 13 in **Haystack** and its integrations (deepset's RAG and agent framework), 31 in
 **LangChain.rb**, 14 in the Rails app **Sure** (personal finance, 10k★), nine in **pipenv**, **LiteLLM** and **redis-py**, and fixes in Ruby tooling (`rubocop-rspec`, `courrier`, `perron`) and Python
 libraries (`pydantic-ai`, `opik`, `phoenix`, `pdm`) — concurrency, serialization and
@@ -391,8 +391,8 @@ filters. Python, embeddings, pgvector, PostgreSQL.
 ## Open source
 
 <!--long-->
-**429 merged pull requests across 101 open-source projects since July 2026**, 86% of those
-decided (71 closed unmerged); median 16 hours to merge, 272 merged within 24 hours; 29 of the
+**580 merged pull requests across 129 open-source projects since July 2026**, 87% of those
+decided (88 closed unmerged); median 15 hours to merge, 378 merged within 24 hours; 35 of the
 projects have over 10k★. Most are
 in the layer between applications and LLM providers. Each ships a regression test that fails
 without the fix. Five that show the kind of work:
@@ -410,7 +410,7 @@ without the fix. Five that show the kind of work:
   was rejected. *Cause:* every `content_block_stop` re-yielded all tool calls seen so far
   (1, then 1+2, then 1+2+3), and the tool-invocation middleware acted on each. *Fix:* yield
   the calls once, at the end of the stream, with the final usage. *Impact:* merged the same
-  day; 69 merged in that repo, including the streamed input and cache token counts
+  day; 85 merged in that repo, including the streamed input and cache token counts
   ([#214](https://github.com/lofcz/LLMTornado/pull/214)).
 - **Haystack — async paths that drifted from the sync ones**
   ([#12662](https://github.com/deepset-ai/haystack/pull/12662),
@@ -508,8 +508,8 @@ work (LangChain.rb went from 6 to 31 merged, LLM Tornado to 69); and fixing what
 runs for fork PRs.
 <!--/long-->
 <!--short:
-**429 merged pull requests across 101 open-source projects since July 2026**, 86% of those
-decided; median 16 hours to merge. Mostly the layer between applications and LLM providers,
+**580 merged pull requests across 129 open-source projects since July 2026**, 87% of those
+decided; median 15 hours to merge. Mostly the layer between applications and LLM providers,
 each with a regression test that fails without the fix:
 
 - **LiteLLM** ([#44795](https://github.com/BerriAI/litellm/pull/44795)): streamed Vertex AI
@@ -517,7 +517,7 @@ each with a regression test that fails without the fix:
   10% uplift; now the logger prices streamed and non-streamed calls the same way.
 - **LLM Tornado** ([#205](https://github.com/lofcz/LLMTornado/pull/205)): Anthropic streaming
   re-yielded every tool call at each block end, so three parallel tools ran six times and the
-  follow-up was rejected; calls are now yielded once with the final usage. 69 merged there.
+  follow-up was rejected; calls are now yielded once with the final usage. 85 merged there.
 - **Haystack** ([#12662](https://github.com/deepset-ai/haystack/pull/12662)): `run_async` had
   drifted from `run` — no concurrency limit, a lock shared across event loops. 13 merged in
   deepset's framework ([write-up](https://portfolio-alexgonzalez33.vercel.app/writing/haystack-async-concurrency)).
