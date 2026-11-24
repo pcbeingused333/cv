@@ -7,7 +7,7 @@
 **Software Engineer · Python / TypeScript / Ruby · agent-driven engineering**
 -->
 
-Santo Domingo, Dominican Republic — UTC−4 · Independent contractor (Spanish passport) · Spanish (native), English (professional)
+Santo Domingo, Dominican Republic — UTC−4 · Independent contractor (Spanish passport) · Spanish (native), English (professional) · **Available immediately**
 [alex.castillog33@gmail.com](mailto:alex.castillog33@gmail.com) · [github.com/pcbeingused333](https://github.com/pcbeingused333) · [linkedin.com/in/alexcastillogonzalez](https://www.linkedin.com/in/alexcastillogonzalez) · Merge Log: [portfolio-alexgonzalez33.vercel.app](https://portfolio-alexgonzalez33.vercel.app)
 
 ---
@@ -22,8 +22,8 @@ retirements — and on the agent systems that do that work at scale. I designed 
 multi-agent pipeline of coding agents that finds real bugs in open-source AI tooling,
 reproduces them, fixes them with a failing-first test and puts every change through an
 independent reviewer before it is published. Since August 2026 maintainers have merged
-**1,095 of its pull requests across 256 projects** (86% of those decided; median 19 hours to
-merge), 230 of them in projects with over 10k★: Microsoft's **semantic-kernel**, ByteDance's
+**1,737 of its pull requests across 405 repositories** (82% of those decided; median 26 hours to
+merge), 310 of them in projects with over 10k★: Microsoft's **semantic-kernel**, ByteDance's
 **deer-flow**, **LiteLLM**, **MLflow**, **redis-py**, **Sentry**, Pydantic's **logfire**,
 deepset's **Haystack**, **Arize Phoenix** and **Opik**. My part is the part a company hires
 for: deciding where to work and what is worth fixing, setting the quality bar the agents must
@@ -38,8 +38,8 @@ Applied AI engineer on the **LLM integration layer** — streaming, tool calls, 
 accounting, provider changes and model retirements — and on the agent systems that do that
 work at scale. I designed and run a multi-agent pipeline that finds, reproduces and fixes bugs
 in open-source AI tooling, with an independent reviewer gating every change. Maintainers have
-merged **1,095 of its pull requests across 256 projects** since August 2026 (86% of those
-decided; median 19 hours), 230 in projects with over 10k★, including **semantic-kernel**,
+merged **1,737 of its pull requests across 405 repositories** since August 2026 (82% of those
+decided; median 26 hours), 310 in projects with over 10k★, including **semantic-kernel**,
 **deer-flow**, **LiteLLM**, **MLflow**, **redis-py**, **Sentry** and **Haystack**. I decide
 where to work, set the quality bar and keep cost per change down; the fixes became
 [`tanda`](https://github.com/pcbeingused333/tanda) and
@@ -51,9 +51,9 @@ ran a business on my own in Toronto.
 Software engineer working across Python, TypeScript and Ruby who ships through a pipeline of
 coding agents I designed and run: it finds real bugs, reproduces them, fixes them with a
 failing-first test and puts every change through an independent reviewer before publishing.
-Maintainers have merged **1,095 of its pull requests across 256 open-source projects** since
-August 2026 (86% of those decided): 99 in the .NET LLM SDK **LLM Tornado**, 31 in
-**LangChain.rb**, 18 in the Rails app **Sure** (10k★), 18 in **pipenv**, 20 in **PostHog**'s
+Maintainers have merged **1,737 of its pull requests across 405 open-source repositories** since
+August 2026 (82% of those decided): 112 in the .NET LLM SDK **LLM Tornado**, 31 in
+**LangChain.rb**, 21 in the Rails app **Sure** (17k★), 26 in **pipenv**, 45 in **PostHog**'s
 SDKs, 18 in deepset's **Haystack** and its integrations, 8 in Microsoft's **semantic-kernel**,
 and fixes in **redis-py**, **MLflow** and **LiteLLM** — concurrency, serialization,
 error-handling and API-compatibility defects. I build end to end: Python services with their
@@ -121,8 +121,8 @@ opencode) · independent review gates · LLM APIs, streaming and tool calls · M
   merge rate of 88%, and about $2.50–4 of model usage per published PR at API prices. Moving
   reviewers to a cheaper model after a side-by-side test cut their cost about 2.5× at nearly
   the same verdict quality.
-- **Result:** 1,095 merged pull requests across 256 projects, 230 of them in projects with over
-  10k★, median 19 hours to merge.
+- **Result:** 1,737 merged pull requests across 405 repositories, 310 of them in projects with over
+  10k★, median 26 hours to merge.
 <!--/long-->
 <!--short:
 - Designed a pipeline of coding agents around one shared queue: scouts find bugs users hit in
@@ -132,7 +132,7 @@ opencode) · independent review gates · LLM APIs, streaming and tool calls · M
 - Set its rules: only work maintainers want, per-repo caps, skip repos that reject AI-assisted
   contributions, disclose AI involvement. Tracked cost, merge rate and context per run: 88%
   30-day merge rate, about $2.50–4 of model usage per published PR.
-- 1,095 merged pull requests across 256 projects, 230 in projects with over 10k★.
+- 1,737 merged pull requests across 405 repositories, 310 in projects with over 10k★.
 -->
 
 ### Churrería Calderón — Founder & owner-operator · Toronto, Canada
@@ -245,8 +245,8 @@ Haystack async bugs below.
 ## Open source
 
 <!--long-->
-**1,095 merged pull requests across 256 open-source projects since August 2026**, 86% of those
-decided; median 19 hours to merge, 590 merged within 24 hours; 64 of the projects have over
+**1,737 merged pull requests across 405 open-source repositories since August 2026**, 82% of those
+decided; median 26 hours to merge; 86 of the repositories have over
 10k★. Most are in the layer between applications and LLM providers, and the same bugs recur
 across the ecosystem: streamed parallel tool calls merged when a provider omits the index
 (fixed in 24 repositories), cache and reasoning tokens missing from usage, sampling
@@ -288,8 +288,8 @@ didn't:** crowded repos where the maintainer fixes it first, and volume: maintai
 how many PRs arrive long before they judge their quality, so the pipeline caps it per repo.
 <!--/long-->
 <!--short:
-**1,095 merged pull requests across 256 open-source projects since August 2026**, 86% of those
-decided; median 19 hours to merge; 64 projects over 10k★. The same bugs recur across the
+**1,737 merged pull requests across 405 open-source repositories since August 2026**, 82% of those
+decided; median 26 hours to merge; 86 repositories over 10k★. The same bugs recur across the
 ecosystem — streamed parallel tool calls merged when a provider omits the index (fixed in 24
 repositories), cache and reasoning tokens missing from usage, sampling parameters sent to
 models that reject them. Examples:
